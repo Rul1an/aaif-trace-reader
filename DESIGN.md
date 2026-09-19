@@ -1,17 +1,17 @@
 # Independent trace reader (Python): design and interpretation record
 
-Status: design only. Revision 2, 17 September 2026: re-pinned to contract v0.3 (PR #51 head `043f67d`), which answered the line 62 question by allowing a mapping-file default for the link method; IC-2, C15, section 8 and section 9 follow it, and two cases were added. Revision 1 (same day) linked the two filed questions. Tag `design-v1` stays on the first commit. No reader is implemented, no fixture has been read by code, no interoperability result is claimed. This document is the pre-implementation record promised on AAIF Observability WG [#45](https://github.com/aaif/wg-observability-and-traceability/issues/45) (comment 5712243517): the design and the interpretation choices are pinned before any #42 fixture is touched, so that a later correction is visible as a revision and not as a silent fit to expected answers.
+Status: design only. Revision 3, 19 September 2026: re-pinned to contract v0.4 (PR #51 head `bca2fda`), which answered the two link-method edges this design had raised (a method outside the four; one relationship exported through two methods). Both answers match the choices this design had already recorded, so IC-2, C15b and C15c keep their outcomes and now cite contract lines instead of being marked as this reader's choice; section 9 closes the link-method row; every contract line reference is renumbered to the v0.4 file. The decision-supersession question (IC-8, line 39) is not answered in v0.4 and stays open. Revision 2, 17 September 2026: re-pinned to contract v0.3 (PR #51 head `043f67d`), which answered the line 62 question by allowing a mapping-file default for the link method; IC-2, C15, section 8 and section 9 follow it, and two cases were added. Revision 1 (same day) linked the two filed questions. Tag `design-v1` stays on the first commit. No reader is implemented, no fixture has been read by code, no interoperability result is claimed. This document is the pre-implementation record promised on AAIF Observability WG [#45](https://github.com/aaif/wg-observability-and-traceability/issues/45) (comment 5712243517): the design and the interpretation choices are pinned before any #42 fixture is touched, so that a later correction is visible as a revision and not as a silent fit to expected answers.
 
 ## 0. Provenance
 
 | Item | Value |
 | --- | --- |
-| Contract baseline | [PR #51 (contract draft v0.3)](https://github.com/aaif/wg-observability-and-traceability/pull/51), `working-documents/AGENT-BEHAVIOR-TRACE-MODEL-CONTRACT.md` at head `043f67d042ca28e0c4b642e83f7fa2a1a0ad7ffe` (v0.3-draft, revision 3, 2026-09-17); `design-v1` was pinned to `1af33bab242f1f5ab3060ef54128014748650f7b` (v0.2-draft) |
-| Contract bytes as read | sha256 `8a6f7e84d513c01797ed0c810a71a212e44c21b1da8da4e01ea32155b7818461` (181 lines; line numbers below refer to this file; v0.2 was `d630b9ef…`, 171 lines) |
-| Other inputs read | #45 (issue body and all comments through 5712243517), #42 (issue body, astrogilda's test-kit offer 2026-09-13), the contract's section 10 fixture example |
+| Contract baseline | [PR #51 (contract draft v0.4)](https://github.com/aaif/wg-observability-and-traceability/pull/51), `working-documents/AGENT-BEHAVIOR-TRACE-MODEL-CONTRACT.md` at head `bca2fda7730593d018794e1e19e05535c5f36f62` (v0.4-draft, revision 4, 2026-09-18); revision 2 of this document was pinned to `043f67d042ca28e0c4b642e83f7fa2a1a0ad7ffe` (v0.3-draft); `design-v1` was pinned to `1af33bab242f1f5ab3060ef54128014748650f7b` (v0.2-draft) |
+| Contract bytes as read | sha256 `00f0533e0f6a1840d86e1a6db84e65081df88e5f41f6650c7171f213f2523c72` (188 lines; line numbers below refer to this file; v0.3 was `8a6f7e84…`, 181 lines; v0.2 was `d630b9ef…`, 171 lines) |
+| Other inputs read | #45 (issue body and all comments through 5739427059), #51 (DingNova's v0.4 reply 5726644070), #42 (issue body, astrogilda's test-kit offer 2026-09-13), the contract's section 10 fixture example |
 | Not opened for this design | any OTel GenAI mapping code I maintain elsewhere; any code or mapping of the other reader |
-| Disclosure of exposure | The other reader's design (imran-siddique, #45 comment 5691732097) was read on 2026-09-17 before this document was written, because it carried the question this design answers. This is therefore not a blind design. Where a choice below coincides with his and a contract sentence carries it, the line is cited; revision 2 of the contract (line 178) was itself written from his reader-design feedback, so lines 49, 60, 88, 90 to 94, 99, 101, 149 and 170 to 172 encode his reading before mine, and agreement on those rows is agreement with the contract as revised, not independent confirmation. The same holds in the other direction for revision 3 (line 178): lines 62 to 70 and 173 to 174 were written in answer to this reader's own question on line 62, so this reader following them is not independent confirmation either. Where a choice coincides with his and no contract sentence carries it (the receipt equality rule in section 4, the source locator triple, cap breach marking processing partial, the receipt-without-execution answer in IC-10, the two comparator controls in section 7), the row or paragraph says so. No text or table was copied; the rules named here were arrived at with his design in view. |
-| Tooling | Written with an AI coding assistant (Claude, Fable 5.1 family) directed and reviewed by the maintainer. The implementation will be written the same way unless stated otherwise in its first commit, and its first commit will name the tooling and model family, as proposed in #45 comment 5712243517 and restated with the pin in 5712718069; the other reader has not yet replied to that proposal. |
+| Disclosure of exposure | The other reader's design (imran-siddique, #45 comment 5691732097) was read on 2026-09-17 before this document was written, because it carried the question this design answers. This is therefore not a blind design. Where a choice below coincides with his and a contract sentence carries it, the line is cited; revision 2 of the contract (line 185) was itself written from his reader-design feedback, so lines 49, 60, 93, 95 to 99, 104, 106, 154 and 175 to 177 encode his reading before mine, and agreement on those rows is agreement with the contract as revised, not independent confirmation. The same holds in the other direction for revision 3 (line 185): lines 62 to 69 and 178 to 179 were written in answer to this reader's own question on line 62, and revision 4 (line 185), lines 70 to 74 and 180 to 181, in answer to this reader's follow-up (#51 comment 5718231537), so this reader following them is not independent confirmation either. Where a choice coincides with his and no contract sentence carries it (the receipt equality rule in section 4, the source locator triple, cap breach marking processing partial, the receipt-without-execution answer in IC-10, the two comparator controls in section 7), the row or paragraph says so. No text or table was copied; the rules named here were arrived at with his design in view. |
+| Tooling | Written with an AI coding assistant (Claude, Fable 5.1 family) directed and reviewed by the maintainer. The implementation will be written the same way unless stated otherwise in its first commit, and its first commit will name the tooling and model family, as proposed in #45 comment 5712243517 and restated with the pin in 5712718069; the other reader agreed to record language, libraries and AI assistance before the first comparison (5739427059). |
 | Language | Python 3.12+, standard library only for the reader and the comparator. No third-party JSON, no ORM, no framework. |
 
 Nothing in this document is a claim about the two agent examples (#43, #44), which have no exports yet, or about the test kit (#42), which has no fixtures yet.
@@ -29,11 +29,11 @@ The contract (lines 17 to 22) names four priority questions. The reader answers 
 
 The reader refuses to answer, and says so in the report:
 
-- turn **order** inside a conversation (line 86: ordering must not depend only on timestamps or a single span tree; no ordering relation is among R1 to R6, and `gen_ai.request.previous_response.id` (line 118) is recorded as an observation, not used for order);
+- turn **order** inside a conversation (line 91: ordering must not depend only on timestamps or a single span tree; no ordering relation is among R1 to R6, and `gen_ai.request.previous_response.id` (line 123) is recorded as an observation, not used for order);
 - whether a turn is suspended, resumed or closed (section 9 item 3 is open);
-- whether a denial was **enforced** (line 94);
-- whether an effect **occurred** when no receipt is exported (line 98);
-- any total usage across aggregation levels without declared semantics (lines 88 and 171);
+- whether a denial was **enforced** (line 99);
+- whether an effect **occurred** when no receipt is exported (line 103);
+- any total usage across aggregation levels without declared semantics (lines 93 and 176);
 - anything that would require a relationship the export did not carry (line 62).
 
 ## 2. Independence boundary
@@ -47,7 +47,7 @@ Two mechanical consequences, so the boundary is checkable rather than asserted:
 
 ## 3. Parsing contract (the Python-specific part)
 
-The contract says records are interpreted as a set (line 100) and forbids synthesized identifiers (line 47). The parser has to make that true before interpretation starts, and Python's `json` does not do it on its own.
+The contract says records are interpreted as a set (line 105) and forbids synthesized identifiers (line 47). The parser has to make that true before interpretation starts, and Python's `json` does not do it on its own.
 
 | Concern | Rule | Why it is written rather than inherited |
 | --- | --- | --- |
@@ -64,18 +64,18 @@ Every parsed record carries a source locator: input digest, member name, record 
 
 ## 4. Data model: four tables and one key
 
-The reader is relational, not a pipeline over objects. After parsing, it holds exactly four tables and derives answers by set queries over them. This is the design decision that most shapes everything else, and it was taken because the contract's rules are statements about sets (lines 86, 99, 100, 101) and about counting (line 88), and none about processing order.
+The reader is relational, not a pipeline over objects. After parsing, it holds exactly four tables and derives answers by set queries over them. This is the design decision that most shapes everything else, and it was taken because the contract's rules are statements about sets (lines 91, 104, 105, 106) and about counting (line 93), and none about processing order.
 
 **Scoped key.** Every identity is the triple `(scope, kind, native_id)`. `scope` is the issuing system, and where the export carries it, the tenant (identity rule 4, line 49). The exported form of scope is open (section 9 item 10), so the mapping file declares where the reader reads it. A record whose scope cannot be read has key `(UNRESOLVED, kind, native_id)`: it is kept, it appears in the report, and it joins nothing.
 
 | Table | Row | Notes |
 | --- | --- | --- |
-| `entities` | scoped key, contract kind (one of the nine identities in section 3), native label, source locators | one row per distinct key; a second record with the same key and different typed fields is a second row in `observations` on that key; a conflict is derived by query from two observations that differ, never stored and never overwritten (line 101) |
-| `relations` | kind (R1..R6), source key, target key, establishment method, source locators | only from exported relationship records; method must be one of the four the contract names (line 62): span link, attribute reference, causal flag, external correlation key |
+| `entities` | scoped key, contract kind (one of the nine identities in section 3), native label, source locators | one row per distinct key; a second record with the same key and different typed fields is a second row in `observations` on that key; a conflict is derived by query from two observations that differ, never stored and never overwritten (line 106) |
+| `relations` | kind (R1..R6), source key, target key, observed methods (one or more), source locators | only from exported relationship records; each method must be one of the four the contract names (line 62): span link, attribute reference, causal flag, external correlation key; one row per (kind, source, target), with every exported method kept (line 73) |
 | `observations` | scoped key, field name, value, aggregation level (for usage), source locators | multi-valued by construction; the same value from two deliveries is one observation with two locators, two different values are two observations |
-| `losses` | source locator, what the mapping could not place, which question it affects | unknown record kinds, unknown fields, relationships without a method, unreadable scope |
+| `losses` | source locator, what the mapping could not place, which question it affects | unknown record kinds, unknown fields, relationships without a resolvable method, relationships with a method outside the four (the unrecognized value is kept, line 72), unreadable scope |
 
-Deduplication rule, used only for `observations` and receipts: two records are the same observation when their **parsed values** are structurally equal after removing only the delivery fields the mapping explicitly names as delivery metadata. No sorting of arrays, no numeric coercion, no Unicode normalization, no "close enough". This rule is not in the contract (line 99 defines no equality; section 9 below) and coincides with the other reader's published rule; a shared reading of an undefined term is a gap to file on #42, not a confirmation.
+Deduplication rule, used only for `observations` and receipts: two records are the same observation when their **parsed values** are structurally equal after removing only the delivery fields the mapping explicitly names as delivery metadata. No sorting of arrays, no numeric coercion, no Unicode normalization, no "close enough". This rule is not in the contract (line 104 defines no equality; section 9 below) and coincides with the other reader's published rule; a shared reading of an undefined term is a gap to file on #42, not a confirmation.
 
 ## 5. Interpretation choices register
 
@@ -83,19 +83,19 @@ Each choice cites the contract line it rests on. "Alternative" names the reading
 
 | # | Choice | Contract basis | Alternative not taken |
 | --- | --- | --- | --- |
-| IC-1 | Input is a set: all files, all members, all records are loaded before any query runs; the report is invariant under any permutation of files and records | line 100 | streaming with first-arrival resolution |
-| IC-2 | The link method is resolved in the contract's order: the record's own non-empty method field, else the example's mapping-file default for that relationship kind when declared, else the relationship is not established and a mapping loss is recorded. A method value outside the four named ones is treated as not established (loss recorded, link unused). A relationship exported twice with the same source, target and kind but different resolved methods is one relationship carrying both methods. The last two are this reader's choices; the contract gives no rule for either and both are raised on #51 | lines 62 to 70, 173, 174 | treat any non-empty method as established; count a relationship once per method |
+| IC-1 | Input is a set: all files, all members, all records are loaded before any query runs; the report is invariant under any permutation of files and records | line 105 | streaming with first-arrival resolution |
+| IC-2 | The link method is resolved in the contract's order: the record's own method field when it carries one of the four named methods, else the example's mapping-file default for that relationship kind when declared, else the relationship is not established and a mapping loss is recorded. A method value outside the four does not satisfy the first step and does not fall back to the default: the relationship is not established and the loss keeps the unrecognized value (line 72). Records with the same source, target and kind establish one relationship, whose observed methods are every method exported for it; different methods are not a conflict (line 73) | lines 62 to 75, 178 to 181 | treat any non-empty method as established; apply the mapping default to an unrecognized method; count a relationship once per method or report different methods as a conflict |
 | IC-3 | Scope is read only from where the mapping file says the export carries it; absent scope means no join, never a default scope | line 49; section 9 item 10 | default to the file's producer as scope |
-| IC-4 | R1 membership comes from the turn's exported conversation identity or an exported R1 record; trace ancestry, process, session and time never establish it | lines 55, 86 | fall back to trace id when conversation id is missing (forbidden by line 47) |
-| IC-5 | Turn order and turn state are not answered in v0.3; the report carries the turn set and `order: not_answered` with the reason | lines 86, 142 | derive order from timestamps or span tree |
-| IC-6 | A logical model call is one entity; attempts are observations on it, not calls; the count of exported calls per turn is the number of distinct call keys with an R2 record; unexported calls are unknown, not zero | lines 37, 56, 88 | count attempts as calls |
-| IC-7 | Usage is reported per declared aggregation level; two levels without declared semantics give `usage: unknown` and both levels are shown; a failure exported without its success gives outcome unknown and usage unknown; line 169's "the call ... unknown" is read as outcome unknown with the call entity established by its failure record (C3), and that wording is filed against line 169 | lines 88, 169, 171 | sum, or prefer the total |
-| IC-8 | Per proposal, decisions and executions are two independent sets; an execution referencing a denied decision is reported as `inconsistent_with_decision` with both records; more than one decision on a proposal is a conflict, because v0.3 defines no supersession | lines 90 to 94, 172 | resolve to the latest decision (**differs** in status: the other reader reports decision applicability as unresolved, this reader reports `conflict`; the contract is silent on a second decision, so neither reading is contract-derived; filed on #51 against line 39 ([comment 5712718367](https://github.com/aaif/wg-observability-and-traceability/pull/51#issuecomment-5712718367))) |
-| IC-9 | Enforcement is never established: denial plus no execution gives `enforcement: unknown`; approval plus execution gives `executed: established`, `enforcement: unknown` | line 94 | infer enforcement from absence |
-| IC-10 | R6 correlation requires the same scoped key on execution and receipt; same key value in another scope is another effect; a receipt with no resolvable execution is an observed effect with `correlation: unresolved` (that last answer is not in the contract and coincides with the other reader's design) | lines 60, 99 | global deduplication by key value |
-| IC-11 | Two receipts with the same scoped key and equal content are one effect with two locators; unequal content is a conflict and the effect count for that key is `conflict`, not one and not two | lines 99, 101 | pick the first or the newest |
-| IC-12 | No receipt gives `effect: unknown` with the execution still established | line 98 | report no effect |
-| IC-13 | Report values are `established`, `unknown`, `conflict`, `not_answered` (question not answerable under v0.3, IC-5) and `not_evaluated` (processing incomplete); the last two are never counted as either agreement or disagreement by the comparator. The contract supports only that unknown is not zero (lines 15, 98); the five-value split is this reader's | lines 15, 98 | a single "unknown" bucket |
+| IC-4 | R1 membership comes from the turn's exported conversation identity or an exported R1 record; trace ancestry, process, session and time never establish it | lines 55, 91 | fall back to trace id when conversation id is missing (forbidden by line 47) |
+| IC-5 | Turn order and turn state are not answered in v0.4; the report carries the turn set and `order: not_answered` with the reason | lines 91, 147 | derive order from timestamps or span tree |
+| IC-6 | A logical model call is one entity; attempts are observations on it, not calls; the count of exported calls per turn is the number of distinct call keys with an R2 record; unexported calls are unknown, not zero | lines 37, 56, 93 | count attempts as calls |
+| IC-7 | Usage is reported per declared aggregation level; two levels without declared semantics give `usage: unknown` and both levels are shown; a failure exported without its success gives outcome unknown and usage unknown; line 174's "the call ... unknown" is read as outcome unknown with the call entity established by its failure record (C3), and that wording is filed against line 174 | lines 93, 174, 176 | sum, or prefer the total |
+| IC-8 | Per proposal, decisions and executions are two independent sets; an execution referencing a denied decision is reported as `inconsistent_with_decision` with both records; more than one decision on a proposal is a conflict, because v0.4 defines no supersession | lines 95 to 99, 177 | resolve to the latest decision (**differs** in status: the other reader reports decision applicability as unresolved, this reader reports `conflict`; the contract is silent on a second decision, so neither reading is contract-derived; filed on #51 against line 39 ([comment 5712718367](https://github.com/aaif/wg-observability-and-traceability/pull/51#issuecomment-5712718367)), not answered in v0.4; the other reader restated his reading on #45 (5739427059): a denial followed by an approval can be a valid reconsideration, and arrival order cannot settle which applies) |
+| IC-9 | Enforcement is never established: denial plus no execution gives `enforcement: unknown`; approval plus execution gives `executed: established`, `enforcement: unknown` | line 99 | infer enforcement from absence |
+| IC-10 | R6 correlation requires the same scoped key on execution and receipt; same key value in another scope is another effect; a receipt with no resolvable execution is an observed effect with `correlation: unresolved` (that last answer is not in the contract and coincides with the other reader's design) | lines 60, 104 | global deduplication by key value |
+| IC-11 | Two receipts with the same scoped key and equal content are one effect with two locators; unequal content is a conflict and the effect count for that key is `conflict`, not one and not two | lines 104, 106 | pick the first or the newest |
+| IC-12 | No receipt gives `effect: unknown` with the execution still established | line 103 | report no effect |
+| IC-13 | Report values are `established`, `unknown`, `conflict`, `not_answered` (question not answerable under v0.4, IC-5) and `not_evaluated` (processing incomplete); the last two are never counted as either agreement or disagreement by the comparator. The contract supports only that unknown is not zero (lines 15, 103); the five-value split is this reader's | lines 15, 103 | a single "unknown" bucket |
 | IC-14 | The report never carries wall-clock time, host paths or absolute file names in its body; run metadata is a separate object with contract sha, reader commit, mapping digest, input digests, tooling | section 2 of this document | timestamps in the body |
 
 ## 6. Output
@@ -125,13 +125,13 @@ A separate program reads `report.json` and the test kit's expected answers and w
 
 ## 8. Acceptance cases
 
-The first six degraded cases the contract lists (lines 167 to 172) are the first six rows, and its two cases added in v0.3 (lines 173, 174) are C15 and C15d; each has a positive twin (the same records with the degraded premise repaired). Rows after that are this reader's own, labeled as such until #42 publishes fixtures.
+The first six degraded cases the contract lists (lines 172 to 177) are the first six rows, its two cases added in v0.3 (lines 178, 179) are C15 and C15d, and its two cases added in v0.4 (lines 180, 181) are C15b and C15c; each has a positive twin (the same records with the degraded premise repaired). Rows after that are this reader's own, labeled as such until #42 publishes fixtures.
 
 | # | Case | Required answer |
 | --- | --- | --- |
 | C1 | receipt delivered twice | one effect, two locators |
 | C2 | receipt removed | `effect: unknown`, execution still established |
-| C3 | M2 failure exported, success missing | line 169 says "the call and its usage are unknown"; read here as: the exported failure record establishes that a call was attempted, its outcome and usage are unknown; this reading is filed against line 169, which does not separate existence from outcome |
+| C3 | M2 failure exported, success missing | line 174 says "the call and its usage are unknown"; read here as: the exported failure record establishes that a call was attempted, its outcome and usage are unknown; this reading is filed against line 174, which does not separate existence from outcome |
 | C4 | second service returns ticket id 42 | two effects in two scopes, no merge, no dedup |
 | C5 | M2 usage per attempt and as total, no declared aggregation | usage unknown, both levels shown |
 | C6 | execution references a denied proposal | both kept, `inconsistent_with_decision`, enforcement unknown |
@@ -143,11 +143,11 @@ The first six degraded cases the contract lists (lines 167 to 172) are the first
 | C12 | turn without conversation identity | membership unknown, no synthesized conversation (line 47) |
 | C13 | resumed work in a new session and trace with the same conversation id | joins the conversation; state `not_answered` |
 | C14 | two decisions on one proposal | conflict; no latest-wins |
-| C15 | relationship record without method, no mapping-file default | link unused, loss recorded, dependent answer unknown (line 173) |
+| C15 | relationship record without method, no mapping-file default | link unused, loss recorded, dependent answer unknown (line 178) |
 | C15a | relationship record without method, mapping-file default declared for that kind | link established with the default method |
-| C15b | relationship record with a method outside the four | link unused, loss recorded (this reader's choice) |
-| C15c | same source, target and kind exported with two different methods | one relationship, both methods kept (this reader's choice) |
-| C15d | same relationship exported twice with the same method | one relationship, two locators (line 174) |
+| C15b | relationship record with a method outside the four, mapping-file default declared for that kind | link unused, default not applied, loss recorded with the unrecognized value (line 180) |
+| C15c | same source, target and kind exported once as a span link and once as an attribute reference | one relationship with two observed methods, not a conflict and not two relationships (line 181) |
+| C15d | same relationship exported twice with the same method | one relationship, two locators (line 179) |
 | C16 | duplicate JSON key, `NaN`, BOM, depth over cap, size over cap | processing failure or partial; never a clean report |
 | C17 | unknown record kind beside a valid baseline | loss recorded; baseline answers unchanged |
 | C18 | usage counter as float or string | counter unknown, loss recorded |
@@ -163,9 +163,9 @@ These controls measure the sensitivity of specific cases. They do not establish 
 | Turn entry, suspend, resume, caller context | section 9 items 1 to 4 | `not_answered` | #41 revision, after #43/#44 |
 | Scope representation | item 10 | mapping-declared; unresolved scope joins nothing | Task 9 upstream, #41 |
 | Usage across providers, hidden retries | item 8 | unknown unless declared | #41 |
-| Decision supersession | not in v0.3 | conflict | filed on #51, comment 5712718367 (IC-8) |
-| Link method | answered in v0.3 (lines 62 to 70) after #51 comment 5712718683; open: a method outside the four, and one edge with two methods | resolver as in IC-2 | follow-up on #51 |
-| What "the same receipt" means | line 99 says "delivered twice", not what equality is | structural equality minus declared delivery fields (IC-11) | #42 fixture definition |
+| Decision supersession | not in v0.4 | conflict | filed on #51, comment 5712718367 (IC-8); unanswered in v0.4 |
+| Link method | answered in v0.3 (lines 62 to 69) after #51 comment 5712718683, and its two edges in v0.4 (lines 70 to 74, 180, 181) after comment 5718231537 | resolver as in IC-2 | settled on #51; no open point |
+| What "the same receipt" means | line 104 says "delivered twice", not what equality is | structural equality minus declared delivery fields (IC-11) | #42 fixture definition |
 | OTel crosswalk | section 7, pinned revisions | not implemented in the first version; the reader reads the examples' exports through their mapping files, not raw OTel | later adapter, verified against the pinned revisions only |
 
 ## 10. Delivery sequence
