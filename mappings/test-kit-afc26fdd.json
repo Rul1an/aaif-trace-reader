@@ -1,0 +1,59 @@
+{
+  "mapping_id": "aaif-test-kit-pr57-afc26fdd",
+  "applies_to": "aaif/wg-observability-and-traceability PR #57 test-kit at head afc26fdd2199844bf7dff23879739e941fa81107",
+  "notes": [
+    "This file is this reader's own mapping of the kit's illustrative attributes to contract identities. The kit's README says the attribute names are illustrative fixture identities, and its TEMPLATE/mapping.md names conversation.id, turn.id, action.id and receipt.* without saying which contract identity or relationship each carries, so every placement below is this reader's declaration.",
+    "Scope is read from the resource attribute service.name (IC-3). No tenant is exported.",
+    "The records carry no relationship records and no method field. Every relationship below is established through this file's per-kind default method (contract lines 62 to 68, IC-2 step 2).",
+    "receipt.action_id is read as a reference to the proposed-action identity issued by support-agent. That scope is declared here, from the kit README ('The agent proposes creating a ticket as action P1'); the receipt itself does not carry it.",
+    "The external effect is keyed by receipt.id in the receipt service's scope. receipt.ticket_id is an observation. For the four cases at this head the two choices group receipts identically.",
+    "receipt.signature and evidence.externally_verified are deliberately not placed: contract v0.7 line 112 reads a service-side receipt as correlation evidence, not cryptographic attestation, and gives neither field a meaning. Both surface as losses."
+  ],
+  "scope": {"from": "resource_attribute", "key": "service.name"},
+  "delivery_fields": ["traceId", "spanId", "parentSpanId", "startTimeUnixNano", "endTimeUnixNano"],
+  "default_methods": {
+    "R1": "attribute-reference",
+    "R5": "attribute-reference",
+    "R6": "external-correlation-key"
+  },
+  "entities": [
+    {
+      "kind": "turn",
+      "span_name": {"exact": "invoke_agent"},
+      "native_id": "turn.id",
+      "observations": [],
+      "references": [
+        {"relation": "R1", "attribute": "conversation.id", "target_kind": "conversation", "target_scope": {"same_as_source": true}}
+      ]
+    },
+    {
+      "kind": "proposed_action",
+      "span_name": {"exact": "propose_action"},
+      "native_id": "action.id",
+      "observations": ["action.intent"],
+      "references": []
+    },
+    {
+      "kind": "tool_execution",
+      "span_name": {"prefix": "execute_tool "},
+      "native_id": null,
+      "observations": ["tool.name"],
+      "references": [
+        {"relation": "R5", "attribute": "action.id", "target_kind": "proposed_action", "target_scope": {"same_as_source": true}}
+      ],
+      "correlation_keys": [
+        {"relation": "R6", "attribute": "action.id", "key_kind": "proposed_action", "key_scope": {"same_as_source": true}}
+      ]
+    },
+    {
+      "kind": "external_effect",
+      "span_name": {"exact": "ticket.create.receipt"},
+      "native_id": "receipt.id",
+      "observations": ["receipt.action_id", "receipt.ticket_id", "receipt.created_at", "receipt.service"],
+      "references": [],
+      "correlation_keys": [
+        {"relation": "R6", "attribute": "receipt.action_id", "key_kind": "proposed_action", "key_scope": {"declared": "support-agent"}}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,209 @@
+"""Four tables and one key, DESIGN.md section 4.
+
+All inputs are loaded before any query runs (IC-1), and every answer is a set
+query over the tables. Nothing here depends on the order records arrived in:
+outputs are sorted by their canonical form.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+from dataclasses import dataclass, field
+
+from .parse import Locator, SpanRecord
+
+METHODS = ("span-link", "attribute-reference", "causal-flag", "external-correlation-key")
+KEYLESS = "KEYLESS"
+UNRESOLVED = "UNRESOLVED"
+
+
+def canon(obj) -> str:
+    return json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+
+
+def render_value(tv):
+    """A typed value in report form: [type, value], never a bare coerced value."""
+    tag = tv[0]
+    if tag == "null":
+        return ["null"]
+    if tag in ("array",):
+        return ["array", [render_value(v) for v in tv[1]]]
+    if tag == "object":
+        return ["object", [[k, render_value(v)] for k, v in tv[1]]]
+    return [tag, tv[1]]
+
+
+@dataclass
+class Tables:
+    entities: dict = field(default_factory=dict)       # key -> {"kind", "locators", "keyless"}
+    observations: dict = field(default_factory=dict)   # (key, field, typed) -> set(Locator)
+    relations: dict = field(default_factory=dict)      # (rel, src, tgt) -> {"methods": set, "locators": set}
+    losses: list = field(default_factory=list)         # dicts
+    contents: dict = field(default_factory=dict)       # key -> {content_canon: set(Locator)}
+    record_key: dict = field(default_factory=dict)     # Locator -> key
+    decision_outcomes: dict = field(default_factory=dict)  # key -> {"denied"|"approved"|other}
+
+
+def _match(rule, name: str) -> bool:
+    spec = rule["span_name"]
+    if "exact" in spec:
+        return name == spec["exact"]
+    if "prefix" in spec:
+        return name.startswith(spec["prefix"])
+    return False
+
+
+def _scope(mapping, rec: SpanRecord):
+    s = mapping["scope"]
+    if s.get("from") == "resource_attribute":
+        v = rec.resource.get(s["key"])
+        if v and v[0] == "str" and v[1]:
+            return v[1]
+    return None
+
+
+def _target_scope(spec, source_scope):
+    if spec.get("same_as_source"):
+        return source_scope
+    if "declared" in spec:
+        return spec["declared"]
+    return None
+
+
+def _content(rec: SpanRecord) -> str:
+    """Record content minus declared delivery fields (DESIGN.md section 4 dedup rule)."""
+    return canon({
+        "name": rec.name,
+        "resource": [[k, render_value(v)] for k, v in sorted(rec.resource.items())],
+        "attrs": [[k, render_value(v)] for k, v in sorted(rec.attrs.items())],
+    })
+
+
+def build(records: list[SpanRecord], mapping: dict) -> Tables:
+    t = Tables()
+    defaults = mapping.get("default_methods", {})
+    pending_keyless = []   # (rec, rule, scope)
+    correlations = []      # (rel, key_triple, role, owner_key or rec, locator)
+
+    for rec in records:
+        rule = next((r for r in mapping["entities"] if _match(r, rec.name)), None)
+        if rule is None:
+            t.losses.append({"locator": rec.locator, "record": None, "what": f"unknown record kind {rec.name!r}", "question": None})
+            continue
+        scope = _scope(mapping, rec)
+        placed = set(rule.get("observations", []))
+        if rule["native_id"]:
+            placed.add(rule["native_id"])
+        placed |= {r["attribute"] for r in rule.get("references", [])}
+        placed |= {c["attribute"] for c in rule.get("correlation_keys", [])}
+        if rule.get("outcome"):
+            placed.add(rule["outcome"]["attribute"])
+
+        nid = None
+        if rule["native_id"]:
+            v = rec.attrs.get(rule["native_id"])
+            if v and v[0] == "str" and v[1]:
+                nid = v[1]
+        if rule["native_id"] is None or nid is None:
+            pending_keyless.append((rec, rule, scope, placed))
+            continue
+        key = (scope if scope is not None else UNRESOLVED, rule["kind"], nid)
+        _place(t, rec, rule, key, scope, placed, defaults, correlations)
+
+    # Keyless records get a display label that is stable under permutation and
+    # renaming. It is not an identity and joins nothing (identity rule 2).
+    groups: dict = {}
+    for rec, rule, scope, placed in pending_keyless:
+        groups.setdefault((rule["kind"], _content(rec)), []).append((rec, rule, scope, placed))
+    for (kind, content), members in sorted(groups.items()):
+        base = hashlib.sha256(content.encode()).hexdigest()[:16]
+        members.sort(key=lambda m: m[0].locator.render())
+        for i, (rec, rule, scope, placed) in enumerate(members, 1):
+            label = base if len(members) == 1 else f"{base}~{i}"
+            key = (KEYLESS, kind, label)
+            t.losses.append({"locator": rec.locator, "record": key, "what": f"no native id ({rule['native_id'] or 'none mapped'}); kept keyless, joins nothing", "question": _question_for(kind)})
+            _place(t, rec, rule, key, scope, placed, defaults, correlations)
+
+    # R6 by shared scoped correlation key (IC-10): execution side x effect side.
+    by_key: dict = {}
+    for rel, ckey, kind, owner, loc in correlations:
+        by_key.setdefault((rel, ckey), {"tool_execution": set(), "external_effect": set()}).setdefault(kind, set()).add((owner, loc))
+    for (rel, ckey), sides in by_key.items():
+        method = defaults.get(rel)
+        for ex, exloc in sides.get("tool_execution", ()):
+            for ef, efloc in sides.get("external_effect", ()):
+                if method not in METHODS:
+                    t.losses.append({"locator": efloc, "record": ef, "what": f"{rel} correlation without an established method", "question": "effects"})
+                    continue
+                slot = t.relations.setdefault((rel, ex, ef), {"methods": set(), "locators": set()})
+                slot["methods"].add(method)
+                slot["locators"].update({exloc, efloc})
+    return t
+
+
+def _question_for(kind):
+    return {
+        "turn": "continuity",
+        "conversation": "continuity",
+        "model_call": "calls",
+        "proposed_action": "approvals",
+        "approval_decision": "approvals",
+        "tool_execution": "effects",
+        "external_effect": "effects",
+    }.get(kind)
+
+
+def _place(t, rec, rule, key, scope, placed, defaults, correlations):
+    ent = t.entities.setdefault(key, {"kind": rule["kind"], "locators": set(), "keyless": key[0] == KEYLESS})
+    ent["locators"].add(rec.locator)
+    t.record_key[rec.locator] = key
+    t.contents.setdefault(key, {}).setdefault(_content(rec), set()).add(rec.locator)
+    q = _question_for(rule["kind"])
+
+    if scope is None:
+        t.losses.append({"locator": rec.locator, "record": key, "what": "scope not readable; record joins nothing", "question": q})
+
+    oc = rule.get("outcome")
+    if oc:
+        v = rec.attrs.get(oc["attribute"])
+        val = v[1] if v and v[0] == "str" else None
+        norm = "denied" if val == oc.get("denied") else "approved" if val == oc.get("approved") else f"other:{val}"
+        t.decision_outcomes.setdefault(key, set()).add(norm)
+
+    for name in rule.get("observations", []):
+        if name in rec.attrs:
+            t.observations.setdefault((key, name, rec.attrs[name]), set()).add(rec.locator)
+
+    for name in sorted(set(rec.attrs) - placed):
+        t.losses.append({"locator": rec.locator, "record": key, "what": f"attribute {name!r} has no placement in the mapping", "question": q})
+    if rec.links:
+        t.losses.append({"locator": rec.locator, "record": key, "what": f"{rec.links} span link(s) with no mapped relationship", "question": q})
+
+    for ref in rule.get("references", []):
+        v = rec.attrs.get(ref["attribute"])
+        if not v or v[0] != "str" or not v[1]:
+            continue
+        rel = ref["relation"]
+        tscope = _target_scope(ref["target_scope"], scope)
+        if scope is None or tscope is None:
+            t.losses.append({"locator": rec.locator, "record": key, "what": f"{rel} reference with unresolved scope", "question": q})
+            continue
+        method = defaults.get(rel)
+        if method not in METHODS:
+            t.losses.append({"locator": rec.locator, "record": key, "what": f"{rel} reference without an established method", "question": q})
+            continue
+        tgt = (tscope, ref["target_kind"], v[1])
+        slot = t.relations.setdefault((rel, key, tgt), {"methods": set(), "locators": set()})
+        slot["methods"].add(method)
+        slot["locators"].add(rec.locator)
+
+    for c in rule.get("correlation_keys", []):
+        v = rec.attrs.get(c["attribute"])
+        if not v or v[0] != "str" or not v[1]:
+            continue
+        kscope = _target_scope(c["key_scope"], scope)
+        if kscope is None:
+            t.losses.append({"locator": rec.locator, "record": key, "what": f"{c['relation']} correlation key with unresolved scope", "question": q})
+            continue
+        correlations.append((c["relation"], (kscope, c["key_kind"], v[1]), rule["kind"], key, rec.locator))
