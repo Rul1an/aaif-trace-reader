@@ -14,16 +14,18 @@ it. The kit's `run.py` and `generate.py` were not read, because they carry anoth
 
 ## Against the contract or the kit (to file on #41 or #42, not settle between readers)
 
-**F1. The evidence-grade pair and contract v0.7 line 112 point in opposite directions.**
-Line 112 reads: "A service-side receipt is correlation evidence, not cryptographic attestation." The
-kit README says `evidence-grade-pair-verifies` confirms the effect because the receipt's signature
-verifies, and `evidence-grade-pair-fails` leaves it unconfirmed because the signature fails, with
-every producer-authored field identical. A reader following v0.7 gives the signature no meaning, so
-it answers both cases the same way. This reader does: the effect is `established` in both, and
-`receipt.signature` surfaces as an unplaced attribute (`results/afc26fdd/`). Either the contract
-needs a revision that admits an evidence grade (a receipt verified against the key of the external
-party it names), or the pair tests the MCP boundary deep dive's section 3.3 (PR #32) and not
-contract v0.7. Neither reading is this reader's to choose.
+**F1. The evidence-grade pair follows a different document than the reader, and nothing a reader
+may read says so.** Contract v0.7 line 112 reads: "A service-side receipt is correlation evidence,
+not cryptographic attestation." The kit README (line 25) says the pair is "the fixture pair from
+section 3.3 of the MCP boundary deep dive" (PR #32), and that cases for continuity, calls and
+approvals, none of which is in the kit yet, will follow the contract (#41). Section 3.3 attaches to an E0 to E4 ladder that is not in contract v0.7
+(nor in PR #25 at head `05c47c4`). A reader built to v0.7 gives the signature no meaning, so this
+reader answers both pair cases the same way: the effect is `established`, and `receipt.signature`
+surfaces as an unplaced attribute (`results/afc26fdd/`). The correct v0.7 answer is that the pair is
+outside the contract, but this reader cannot tell which case is which: case and file names are not
+input to it (DESIGN.md section 2 item 2, case C9), and every receipt in the kit carries
+`receipt.signature`, the effects cases included, so the field's presence does not identify the pair. The gap is a per-case statement, in the case's
+own files, of which document its expected answer follows.
 
 **F2. The signed bytes are not specified in any text a reader may use.** The README names Ed25519
 and a public key in `trust/`, and says a rebuild is byte-identical because the signatures are
@@ -63,6 +65,13 @@ revision has to say why a report label is not an identifier, or pick another lab
 or record-count cap marks processing `partial` and suppresses every export-level conclusion. The
 implementation reports processing `failed` with no entries, which is stricter and still never looks
 like a clean read (C16). Either the design moves to `failed`, or the implementation adds `partial`.
+
+## Process note
+
+On 2026-09-26 an independent reviewer of a comment draft for PR #57 read a docstring in the kit's
+`generate.py` that describes the signed fields in one phrase. That text came into this session. The
+reader does not implement signature verification, so nothing in `aaif_reader/` depends on it, and
+F2 stands: the README, which is the text a reader may use, does not state the signing input.
 
 ## Before any comparison (DESIGN.md section 10 step 4)
 
