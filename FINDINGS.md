@@ -4,9 +4,13 @@ Status on 2026-09-26: the effects slice runs against the PR #57 test kit at head
 `afc26fdd2199844bf7dff23879739e941fa81107`. **No comparison against expected answers has run.**
 DESIGN.md section 10 step 4 requires every case C1 to C18 and every mutant m1 to m13 to run locally
 first, and most of them are not implemented yet (see "Before any comparison" below). Every finding
-here comes from the pinned contract, the kit's records, its README and its TEMPLATE/mapping.md. No
-expected-answer file was opened, and none of the kit's `run.py` or `generate.py` was read, because
-those carry another reader's source (DESIGN.md section 2).
+here comes from the pinned contract, the kit's records, its README and its TEMPLATE/mapping.md. The
+kit's `expected.json` files were fetched with the records (`scripts/fetch_kit.sh`) into the ignored
+directory `inputs/expected-afc26fdd…/`, and their sha256 digests were computed; their contents have
+not been opened. The reader has no code path to that directory, and `tests/test_reader.py`
+(`IndependenceBoundary`) fails on any reader module that imports the comparator or spells a path to
+it. The kit's `run.py` and `generate.py` were not read, because they carry another reader's source
+(DESIGN.md section 2).
 
 ## Against the contract or the kit (to file on #41 or #42, not settle between readers)
 
