@@ -72,6 +72,9 @@ On 2026-09-26 an independent reviewer of a comment draft for PR #57 read a docst
 `generate.py` that describes the signed fields in one phrase. That text came into this session. The
 reader does not implement signature verification, so nothing in `aaif_reader/` depends on it, and
 F2 stands: the README, which is the text a reader may use, does not state the signing input.
+A second reviewer of the same comment checked the top-level keys of the kit's `expected.json` files
+to confirm that none names a source document, and reported that finding without the key names. The
+maintainer has not opened those files, and nothing in `aaif_reader/` reads them.
 
 ## Before any comparison (DESIGN.md section 10 step 4)
 
