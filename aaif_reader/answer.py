@@ -63,9 +63,13 @@ def continuity(t: Tables):
     for conv in sorted(conversations, key=canon):
         rels = _rels(t, "R1", tgt=conv)
         turns = sorted({r[1] for r in rels}, key=canon)
+        memberships = [
+            {"turn": k(r[1]), "methods": sorted(t.relations[r]["methods"]), "deliveries": len(t.relations[r]["locators"])}
+            for r in rels
+        ]
         out.append(_entry(
             "continuity", conv, "established" if turns else "unknown",
-            {"turns": [k(x) for x in turns], "order": "not_answered",
+            {"turns": [k(x) for x in turns], "memberships": memberships, "order": "not_answered",
              "order_reason": "no ordering relation among R1 to R6; timestamps and span trees do not establish order (contract line 91)",
              "state": "not_answered"},
             missing=[] if turns else ["turns carrying this conversation identity (R1)"],
@@ -89,12 +93,38 @@ def calls(t: Tables):
         mcs = sorted({r[1] for r in rels}, key=canon)
         out.append(_entry(
             "calls", turn, "established" if mcs else "unknown",
-            {"calls": [k(x) for x in mcs]},
+            {"calls": [_call_view(t, x) for x in mcs]},
             missing=[] if mcs else ["model call records referencing this turn (R2); unexported calls are unknown, not zero"],
             losses=_losses_for(t, mcs + [turn]),
             basis=_basis(t, mcs + [turn], rels),
         ))
     return out
+
+
+def _call_view(t: Tables, call):
+    """IC-6 and IC-7: one logical call; attempts are observations on it.
+
+    The outcome is established only by an exported success; a call known only
+    from a failure record exists, with outcome and usage unknown (C3). Usage is
+    reported per aggregation level and never summed across levels (C5).
+    """
+    recs = list(t.call_records.get(call, {}).values())
+    outcomes = {r["outcome"] for r in recs}
+    levels: dict = {}
+    for r in recs:
+        for level, value in r["counters"].items():
+            levels.setdefault(level, []).append(value)
+    declared = any(r["declared"] for r in recs)
+    usage = {"status": "unknown", "levels": {lv: sorted(vs, key=canon) for lv, vs in sorted(levels.items())}}
+    if "success" in outcomes:
+        call_level = levels.get("call", [])
+        only_call = set(levels) == {"call"}
+        if (only_call or (declared and call_level)) and call_level and "unknown" not in call_level:
+            distinct = sorted(set(call_level))
+            usage["status"] = "established" if len(distinct) == 1 else "conflict"
+            if len(distinct) == 1:
+                usage["value"] = distinct[0]
+    return {"call": k(call), "outcome": "succeeded" if "success" in outcomes else "unknown", "usage": usage}
 
 
 def approvals(t: Tables):
@@ -115,9 +145,10 @@ def approvals(t: Tables):
                 items.append({"execution": k(ex), "followed": k(refs[0]), "finding": verdict})
             else:
                 items.append({"execution": k(ex), "finding": "unresolved"})
+        conflicts = [k(d) for d in decisions if len(t.contents.get(d, {})) > 1]
         extra = {
             "decision_count": len(decisions),
-            "decisions_recorded": [k(d) for d in decisions],
+            "decisions_recorded": [{"decision": k(d), "outcome": _outcome(t, d)} for d in decisions],
             "enforcement": "unknown",
             "executed": "established" if executions else "unknown",
             "relations": items,
@@ -128,6 +159,7 @@ def approvals(t: Tables):
             "approvals", p, "established" if p in t.entities else "unknown",
             {"decisions": [k(d) for d in decisions], "executions": [k(e) for e in executions]},
             missing=[] if p in t.entities else ["the proposed action record itself"],
+            conflicts=conflicts,
             losses=_losses_for(t, [p] + decisions + executions),
             basis=_basis(t, [p] + decisions + executions, drels + erels),
             **extra,
@@ -135,14 +167,21 @@ def approvals(t: Tables):
     return out
 
 
+def _outcome(t, decision):
+    outcomes = set(t.decision_outcomes.get(decision, {}).values())
+    if len(outcomes) > 1:
+        return "conflict"
+    return next(iter(outcomes)) if outcomes else "unknown"
+
+
 def _decision_verdict(t, decision):
     """IC-8: a referenced denial is inconsistent_with_decision, a referenced
     approval consistent (this reader's symmetric reading). The outcome field and
     its values come from the mapping; anything else leaves the finding unresolved."""
-    outcomes = t.decision_outcomes.get(decision, set())
-    if outcomes == {"denied"}:
+    outcome = _outcome(t, decision)
+    if outcome == "denied":
         return "inconsistent_with_decision"
-    if outcomes == {"approved"}:
+    if outcome == "approved":
         return "consistent"
     return "unresolved"
 

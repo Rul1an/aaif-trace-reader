@@ -1,9 +1,9 @@
 # Findings from the first implementation slice
 
-Status on 2026-09-26 (updated for DESIGN.md revision 7): the effects slice runs against the PR #57 test kit at head
+Status on 2026-09-26 (updated for DESIGN.md revision 7 and the full local case set): the reader runs against the PR #57 test kit at head
 `afc26fdd2199844bf7dff23879739e941fa81107`. **No comparison against expected answers has run.**
-DESIGN.md section 10 step 4 requires every case C1 to C18 and every mutant m1 to m13 to run locally
-first, and most of them are not implemented yet (see "Before any comparison" below). Every finding
+DESIGN.md section 10 step 4, every case C1 to C18 and every mutant m1 to m13 run locally first, is
+now met (see the last section). Every finding
 here comes from the pinned contract, the kit's records, its README and its TEMPLATE/mapping.md. The
 kit's `expected.json` files were fetched with the records (`scripts/fetch_kit.sh`) into the ignored
 directory `inputs/expected-afc26fdd…/`, and their sha256 digests were computed; their contents have
@@ -76,15 +76,27 @@ A second reviewer of the same comment checked the top-level keys of the kit's `e
 to confirm that none names a source document, and reported that finding without the key names. The
 maintainer has not opened those files, and nothing in `aaif_reader/` reads them.
 
-## Before any comparison (DESIGN.md section 10 step 4)
+## Before any comparison (DESIGN.md section 10 step 4): complete
 
-Implemented and passing: the parsing contract (C16: duplicate key, NaN, BOM, invalid UTF-8, depth,
-size, duplicate attribute key), typed equality, C1, C2, C4, C10 (including `1` against `1.0`), C11,
-C17, C7 and C8 (200 seeded shuffles of each kit case), C9, the revision 7 keyless handle (including 100 shuffles of two keyless executions on one proposal), partial processing on a size or record-count breach, the split-across-files form of IC-1, and
-the independence boundary test. Mutants m1, m2 and m5 each turn their named case red, and so do three reverted behaviours: failing on a cap breach, a content-hash label, and truncating by arrival order. The boundary
-test turns red on a planted comparator import and on a planted expected-answer path.
+Every case in section 8 now runs locally, including each lettered variant: C1, C2, C4, C9, C10, C11,
+C16 and C17 in `tests/test_reader.py`, and C3, C5, C6, C6a, C6b, C7, C8, C12, C13, C14 to C14c,
+C15 to C15d and C18 in `tests/test_cases.py`, with the positive twins section 8 names. The local
+cases use `mappings/local-v1.json`, this reader's own mapping for its own records; none is a WG
+fixture. 54 tests pass.
 
-Not implemented: C3, C5, C6, C6a, C6b, C12, C13, C14 to C14c, C15 to C15d and C18, which need local
-mappings for model calls, decisions and relationship records, and mutants m3, m4 and m6 to m13. The
-comparator (section 7) is not written; its input format is the kit's `expected.json`, which has not
-been opened.
+`python3 tests/mutants.py` applies each of m1 to m13, plus three controls for behaviours the first
+slice had (failing on a cap breach, a content-hash label, truncation by arrival order), and requires
+every one to turn its named case red **by an assertion failure**. A kill by an exception is reported
+as `ERROR` and counts as a survivor, because it shows the mutant broke the program rather than that a
+case caught a wrong answer. The first run of that rule found two such kills (m8, m11), caused by
+tests indexing a field the mutant removed; those asserts now compare the field, and all 16 are killed
+by an assertion failure.
+
+Two notes on how the cases meet section 8's wording. m6 ("resolve references in arrival order, C7
+or C8 must fail") is killed by a 200-shuffle invariance test on a proposal with two decisions and two
+executions, which is a C8-form test on approvals; the section 10 example in C7 has one referenced
+decision per proposal, so arrival-order resolution cannot change its answer. C7 has ten records, over
+section 8's exhaustive limit of nine, so it runs 300 seeded shuffles.
+
+Not done yet: the comparator (section 7). Writing it means opening the kit's `expected.json` files for
+the first time, and the comparison runs once per pinned fixture revision (section 10 step 5).

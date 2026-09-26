@@ -41,7 +41,8 @@ class Tables:
     losses: list = field(default_factory=list)         # dicts
     contents: dict = field(default_factory=dict)       # key -> {content_canon: set(Locator)}
     record_key: dict = field(default_factory=dict)     # Locator -> key
-    decision_outcomes: dict = field(default_factory=dict)  # key -> {"denied"|"approved"|other}
+    decision_outcomes: dict = field(default_factory=dict)  # key -> {content_canon: "denied"|"approved"|"other:<v>"}
+    call_records: dict = field(default_factory=dict)       # key -> {content_canon: {"outcome", "counters", "declared"}}
 
 
 def _match(rule, name: str) -> bool:
@@ -85,7 +86,11 @@ def build(records: list[SpanRecord], mapping: dict) -> Tables:
     pending_keyless = []   # (rec, rule, scope)
     correlations = []      # (rel, key_triple, role, owner_key or rec, locator)
 
+    relrule = mapping.get("relationship_records")
     for rec in records:
+        if relrule and _match(relrule, rec.name):
+            _relationship_record(t, rec, relrule, _scope(mapping, rec), defaults)
+            continue
         rule = next((r for r in mapping["entities"] if _match(r, rec.name)), None)
         if rule is None:
             t.losses.append({"locator": rec.locator, "record": None, "what": f"unknown record kind {rec.name!r}", "question": None})
@@ -98,6 +103,9 @@ def build(records: list[SpanRecord], mapping: dict) -> Tables:
         placed |= {c["attribute"] for c in rule.get("correlation_keys", [])}
         if rule.get("outcome"):
             placed.add(rule["outcome"]["attribute"])
+        if rule.get("attempt_outcome"):
+            placed.add(rule["attempt_outcome"]["attribute"])
+        placed |= {c["attribute"] for c in rule.get("usage_counters", [])}
 
         nid = None
         if rule["native_id"]:
@@ -141,6 +149,44 @@ def build(records: list[SpanRecord], mapping: dict) -> Tables:
     return t
 
 
+def _relationship_record(t, rec: SpanRecord, rr, scope, defaults):
+    """An exported relationship record (contract section 4, IC-2).
+
+    The method comes from the record if it names one of the four; a present
+    but unrecognized method is not established and never falls back to the
+    default; an absent method uses the mapping default for the kind, if any.
+    """
+    def s(name):
+        v = rec.attrs.get(rr[name])
+        return v[1] if v and v[0] == "str" and v[1] else None
+
+    kind, sk, sid, tk, tid = s("kind"), s("source_kind"), s("source_id"), s("target_kind"), s("target_id")
+    src = (scope if scope is not None else UNRESOLVED, sk, sid) if sk and sid else None
+    if not (kind and src and tk and tid):
+        t.losses.append({"locator": rec.locator, "record": src, "what": "relationship record without kind, source or target", "question": None})
+        return
+    q = _question_for(sk)
+    if scope is None:
+        t.losses.append({"locator": rec.locator, "record": src, "what": f"{kind} relationship record with unresolved scope", "question": q})
+        return
+    raw_method = rec.attrs.get(rr["method"])
+    if raw_method is not None:
+        value = raw_method[1] if raw_method[0] == "str" else raw_method
+        if value not in METHODS:
+            t.losses.append({"locator": rec.locator, "record": src, "what": f"{kind} relationship not established: method {value!r} is outside the four named methods", "question": q})
+            return
+        method = value
+    else:
+        method = defaults.get(kind)
+        if method not in METHODS:
+            t.losses.append({"locator": rec.locator, "record": src, "what": f"{kind} relationship not established: no method on the record and no mapping default", "question": q})
+            return
+    tgt = (scope, tk, tid)
+    slot = t.relations.setdefault((kind, src, tgt), {"methods": set(), "locators": set()})
+    slot["methods"].add(method)
+    slot["locators"].add(rec.locator)
+
+
 def _anchor(rec: SpanRecord, rule, scope) -> str:
     anchors = []
     for ref in rule.get("references", []):
@@ -178,7 +224,30 @@ def _place(t, rec, rule, key, scope, placed, defaults, correlations):
         v = rec.attrs.get(oc["attribute"])
         val = v[1] if v and v[0] == "str" else None
         norm = "denied" if val == oc.get("denied") else "approved" if val == oc.get("approved") else f"other:{val}"
-        t.decision_outcomes.setdefault(key, set()).add(norm)
+        t.decision_outcomes.setdefault(key, {})[_content(rec)] = norm
+
+    ao = rule.get("attempt_outcome")
+    if ao or rule.get("usage_counters"):
+        outcome = None
+        if ao:
+            v = rec.attrs.get(ao["attribute"])
+            val = v[1] if v and v[0] == "str" else None
+            outcome = "success" if val == ao.get("success") else "failure" if val == ao.get("failure") else None
+        counters = {}
+        for c in rule.get("usage_counters", []):
+            if c["attribute"] not in rec.attrs:
+                continue
+            v = rec.attrs[c["attribute"]]
+            # IC-7 / DESIGN.md section 3: counters are JSON integers only; a
+            # float, a string or a negative value is a loss and the counter unknown.
+            if v[0] == "int" and v[1] >= 0:
+                counters[c["level"]] = v[1]
+            else:
+                counters[c["level"]] = "unknown"
+                t.losses.append({"locator": rec.locator, "record": key, "what": f"usage counter {c['attribute']!r} is not a non-negative integer ({v[0]}); counter unknown", "question": q})
+        t.call_records.setdefault(key, {})[_content(rec)] = {
+            "outcome": outcome, "counters": counters, "declared": bool(rule.get("aggregation_declared")),
+        }
 
     for name in rule.get("observations", []):
         if name in rec.attrs:

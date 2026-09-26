@@ -1,0 +1,97 @@
+{
+  "mapping_id": "local-v1",
+  "applies_to": "records authored in tests/test_cases.py; LOCAL, not a WG fixture",
+  "notes": [
+    "This reader's own mapping for its own acceptance cases (DESIGN.md section 8). Attribute names are illustrative, like the kit's.",
+    "Every relationship is declared by kind; R5-decision is R5's optional reference from an execution to the decision it followed (contract line 59).",
+    "Usage aggregation is not declared: a record carrying both levels without declared semantics gives usage unknown (IC-7, contract line 93)."
+  ],
+  "scope": {"from": "resource_attribute", "key": "service.name"},
+  "delivery_fields": ["traceId", "spanId", "parentSpanId", "startTimeUnixNano", "endTimeUnixNano"],
+  "default_methods": {
+    "R1": "attribute-reference",
+    "R2": "attribute-reference",
+    "R3": "attribute-reference",
+    "R4": "attribute-reference",
+    "R5": "attribute-reference",
+    "R5-decision": "attribute-reference",
+    "R6": "external-correlation-key"
+  },
+  "relationship_records": {
+    "span_name": {"exact": "relationship"},
+    "kind": "rel.kind",
+    "source_kind": "rel.source_kind",
+    "source_id": "rel.source_id",
+    "target_kind": "rel.target_kind",
+    "target_id": "rel.target_id",
+    "method": "rel.method"
+  },
+  "entities": [
+    {
+      "kind": "turn",
+      "span_name": {"exact": "invoke_agent"},
+      "native_id": "turn.id",
+      "observations": ["session.id"],
+      "references": [
+        {"relation": "R1", "attribute": "conversation.id", "target_kind": "conversation", "target_scope": {"same_as_source": true}}
+      ]
+    },
+    {
+      "kind": "model_call",
+      "span_name": {"prefix": "chat "},
+      "native_id": "call.id",
+      "observations": [],
+      "attempt_outcome": {"attribute": "call.attempt.outcome", "success": "success", "failure": "failure"},
+      "usage_counters": [
+        {"attribute": "usage.attempt.tokens", "level": "attempt"},
+        {"attribute": "usage.call.tokens", "level": "call"}
+      ],
+      "aggregation_declared": false,
+      "references": [
+        {"relation": "R2", "attribute": "turn.id", "target_kind": "turn", "target_scope": {"same_as_source": true}}
+      ]
+    },
+    {
+      "kind": "proposed_action",
+      "span_name": {"exact": "propose_action"},
+      "native_id": "action.id",
+      "observations": ["action.intent"],
+      "references": [
+        {"relation": "R3", "attribute": "turn.id", "target_kind": "turn", "target_scope": {"same_as_source": true}}
+      ]
+    },
+    {
+      "kind": "approval_decision",
+      "span_name": {"exact": "approval"},
+      "native_id": "decision.id",
+      "observations": ["decision.policy", "decision.time"],
+      "outcome": {"attribute": "decision.outcome", "approved": "approved", "denied": "denied"},
+      "references": [
+        {"relation": "R4", "attribute": "decision.proposal_id", "target_kind": "proposed_action", "target_scope": {"same_as_source": true}}
+      ]
+    },
+    {
+      "kind": "tool_execution",
+      "span_name": {"prefix": "execute_tool "},
+      "native_id": "execution.id",
+      "observations": ["tool.name"],
+      "references": [
+        {"relation": "R5", "attribute": "action.id", "target_kind": "proposed_action", "target_scope": {"same_as_source": true}},
+        {"relation": "R5-decision", "attribute": "execution.decision_id", "target_kind": "approval_decision", "target_scope": {"same_as_source": true}}
+      ],
+      "correlation_keys": [
+        {"relation": "R6", "attribute": "ticket.id", "key_kind": "ticket", "key_scope": {"declared": "ticket-service"}}
+      ]
+    },
+    {
+      "kind": "external_effect",
+      "span_name": {"exact": "ticket.create.receipt"},
+      "native_id": "receipt.id",
+      "observations": ["receipt.ticket_id"],
+      "references": [],
+      "correlation_keys": [
+        {"relation": "R6", "attribute": "receipt.ticket_id", "key_kind": "ticket", "key_scope": {"declared": "ticket-service"}}
+      ]
+    }
+  ]
+}
