@@ -23,6 +23,10 @@ class ParseFailure(Exception):
     """The input is not a record set this reader will interpret."""
 
 
+class CapBreach(ParseFailure):
+    """A size or count cap was hit. Processing is partial, not failed (section 3)."""
+
+
 @dataclass(frozen=True)
 class Locator:
     input_digest: str
@@ -89,7 +93,7 @@ def decode(raw: bytes) -> str:
 def load_json(raw: bytes):
     """Parse one input. Raises ParseFailure, never returns a partial value."""
     if len(raw) > MAX_INPUT_BYTES:
-        raise ParseFailure(f"input over size cap {MAX_INPUT_BYTES}")
+        raise CapBreach(f"input over size cap {MAX_INPUT_BYTES}")
     text = decode(raw)
     _check_depth(text)
     try:
@@ -216,5 +220,5 @@ def spans_from_otlp(raw: bytes, member: str) -> list[SpanRecord]:
                 )
                 ordinal += 1
                 if len(out) > MAX_RECORDS:
-                    raise ParseFailure(f"record count over cap {MAX_RECORDS}")
+                    raise CapBreach(f"record count over cap {MAX_RECORDS}")
     return out

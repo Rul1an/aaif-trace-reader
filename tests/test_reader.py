@@ -90,13 +90,47 @@ class ParsingContract(unittest.TestCase):
     def test_depth_over_cap(self):
         self.assertFails(b'{"resourceSpans": [], "x": ' + b"[" * 100 + b"]" * 100 + b"}")
 
-    def test_size_over_cap(self):
+    def test_size_over_cap_is_partial_not_clean(self):
+        # The cap sits above the mapping's size, so only the input breaches it;
+        # a cap below the mapping would make this pass through the mapping path.
+        big = export(AGENT, ("test-ticket-service", [receipt(f"{i:02x}", rid=f"R-{i}") for i in range(40)]))
         old = parse.MAX_INPUT_BYTES
-        parse.MAX_INPUT_BYTES = 10
+        parse.MAX_INPUT_BYTES = len(MAPPING) + 1
         try:
-            self.assertFails(export(AGENT))
+            self.assertGreater(len(big), parse.MAX_INPUT_BYTES)
+            report, run = entries(big)
         finally:
             parse.MAX_INPUT_BYTES = old
+        self.assertEqual(run["processing"]["status"], "partial")
+        self.assertEqual(report["processing"], "partial")
+        self.assertEqual(report["entries"], [])
+
+    def test_cap_breach_suppresses_every_conclusion(self):
+        small = export(AGENT)
+        big = export(AGENT, ("test-ticket-service", [receipt(f"{i:02x}", rid=f"R-{i}") for i in range(40)]))
+        old = parse.MAX_INPUT_BYTES
+        parse.MAX_INPUT_BYTES = max(len(MAPPING), len(small)) + 1
+        try:
+            report, run = read([("a.json", small), ("b.json", big)], MAPPING)
+        finally:
+            parse.MAX_INPUT_BYTES = old
+        self.assertEqual(run["processing"]["status"], "partial")
+        self.assertTrue(report["entries"])
+        self.assertEqual({e["status"] for e in report["entries"]}, {"not_evaluated"})
+        self.assertTrue(all(e["answer"] is None for e in report["entries"]))
+
+    def test_record_count_over_cap_is_partial(self):
+        old = parse.MAX_RECORDS
+        parse.MAX_RECORDS = 1
+        try:
+            report, run = read([("a.json", export(("support-agent", [span("01", "propose_action", action__id="P1")]))),
+                                ("b.json", export(("support-agent", [span("02", "propose_action", action__id="P2")])))], MAPPING)
+        finally:
+            parse.MAX_RECORDS = old
+        self.assertEqual(run["processing"]["status"], "partial")
+        self.assertEqual({e["status"] for e in report["entries"]}, {"not_evaluated"})
+        # Nothing dropped by arrival order: both proposals are still subjects.
+        self.assertEqual(sorted(e["subject"][2] for e in report["entries"]), ["P1", "P2"])
 
     def test_duplicate_attribute_key(self):
         raw = export(("support-agent", [span("01", "propose_action", action__id="P1")])).replace(
@@ -109,6 +143,34 @@ class ParsingContract(unittest.TestCase):
         self.assertNotEqual(parse.typed(1), parse.typed(1.0))
         self.assertNotEqual(parse.typed(1), parse.typed(True))
         self.assertNotEqual(parse.otlp_value({"intValue": "1"}), parse.otlp_value({"stringValue": "1"}))
+
+
+class KeylessHandle(unittest.TestCase):
+    """DESIGN.md section 4, revision 7: anchor and ordinal, never locator or hash."""
+
+    def test_handle_is_anchor_and_ordinal(self):
+        report, _ = entries(export(AGENT))
+        (e,) = effect_entries(report)
+        self.assertEqual(e["subject"], ["KEYLESS", "tool_execution", "R5:support-agent/proposed_action/P1#1"])
+
+    def test_two_keyless_executions_are_stable_under_shuffle(self):
+        two = ("support-agent", [
+            span("01", "propose_action", action__id="P1"),
+            span("02", "execute_tool create_ticket", action__id="P1", tool__name="create_ticket"),
+            span("03", "execute_tool create_ticket", action__id="P1", tool__name="retry_ticket"),
+        ])
+        raw = export(two)
+        want = body(entries(raw)[0])
+        handles = sorted(e["subject"][2] for e in effect_entries(entries(raw)[0]))
+        self.assertEqual(handles, ["R5:support-agent/proposed_action/P1#1", "R5:support-agent/proposed_action/P1#2"])
+        rng = random.Random(7)
+        for _ in range(100):
+            self.assertEqual(body(entries(shuffled(raw, rng))[0]), want)
+
+    def test_unanchored(self):
+        report, _ = entries(export(("support-agent", [span("02", "execute_tool create_ticket", tool__name="x")])))
+        (e,) = effect_entries(report)
+        self.assertEqual(e["subject"], ["KEYLESS", "tool_execution", "unanchored#1"])
 
 
 class Effects(unittest.TestCase):

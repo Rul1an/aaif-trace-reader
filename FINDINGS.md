@@ -1,6 +1,6 @@
 # Findings from the first implementation slice
 
-Status on 2026-09-26: the effects slice runs against the PR #57 test kit at head
+Status on 2026-09-26 (updated for DESIGN.md revision 7): the effects slice runs against the PR #57 test kit at head
 `afc26fdd2199844bf7dff23879739e941fa81107`. **No comparison against expected answers has run.**
 DESIGN.md section 10 step 4 requires every case C1 to C18 and every mutant m1 to m13 to run locally
 first, and most of them are not implemented yet (see "Before any comparison" below). Every finding
@@ -50,21 +50,21 @@ where contract line 60 gives the ticket id returned by both the tool and the ser
 It also needs a scope the receipt does not carry: the mapping declares that `receipt.action_id`
 refers to an action issued by `support-agent`.
 
-## Against this reader's own design (to land as DESIGN.md revision 7 before any comparison)
+## Against this reader's own design (resolved in DESIGN.md revision 7)
 
-**D1. A keyless subject cannot be both locator-labelled and locator-free.** Section 4 keeps a
-keyless record "under a keyless identity, its source locator marked keyless", and section 6 requires
-the report body to be byte-identical across permuted or renamed input, with locators excluded. A
-subject labelled by its locator breaks the second rule. The implementation labels a keyless subject
-by a digest of its content minus the declared delivery fields, with a `~n` suffix when several
-records share content. The label is a display label: it joins nothing and is never exported as an
-identity. It still reads as a content hash, which identity rule 2 forbids as an identifier, so the
-revision has to say why a report label is not an identifier, or pick another label.
+**D1. A keyless subject could not be both locator-labelled and locator-free.** Section 4 kept a
+keyless record under its source locator, and section 6 requires a report body that does not move
+when inputs are permuted or renamed. The first implementation (`f449b0b`) labelled a keyless subject
+by a digest of its content, which identity rule 2 names as a synthesized identifier. Revision 7
+(`da76f63`) renders it as `["KEYLESS", kind, "<anchor>#<n>"]`: the least of the record's own outgoing
+references, and an ordinal in the canonical order of content. The kit's execution is now
+`R5:support-agent/proposed_action/P1#1`. Section 7 matches keyless subjects by kind and anchor.
 
-**D2. Cap breaches fail instead of marking processing partial.** Section 3 says a breach of the size
-or record-count cap marks processing `partial` and suppresses every export-level conclusion. The
-implementation reports processing `failed` with no entries, which is stricter and still never looks
-like a clean read (C16). Either the design moves to `failed`, or the implementation adds `partial`.
+**D2. Cap breaches failed instead of marking processing partial.** This was an implementation
+deviation, not a design question: section 3 already says `partial`, and that choice coincides with
+the other reader's design, so the implementation now follows it. A size or record-count breach marks
+processing `partial`, every entry becomes `not_evaluated` with no answer, and nothing is dropped by
+arrival order. Depth and malformed input still fail.
 
 ## Process note
 
@@ -80,8 +80,8 @@ maintainer has not opened those files, and nothing in `aaif_reader/` reads them.
 
 Implemented and passing: the parsing contract (C16: duplicate key, NaN, BOM, invalid UTF-8, depth,
 size, duplicate attribute key), typed equality, C1, C2, C4, C10 (including `1` against `1.0`), C11,
-C17, C7 and C8 (200 seeded shuffles of each kit case), C9, the split-across-files form of IC-1, and
-the independence boundary test. Mutants m1, m2 and m5 each turn their named case red. The boundary
+C17, C7 and C8 (200 seeded shuffles of each kit case), C9, the revision 7 keyless handle (including 100 shuffles of two keyless executions on one proposal), partial processing on a size or record-count breach, the split-across-files form of IC-1, and
+the independence boundary test. Mutants m1, m2 and m5 each turn their named case red, and so do three reverted behaviours: failing on a cap breach, a content-hash label, and truncating by arrival order. The boundary
 test turns red on a planted comparator import and on a planted expected-answer path.
 
 Not implemented: C3, C5, C6, C6a, C6b, C12, C13, C14 to C14c, C15 to C15d and C18, which need local

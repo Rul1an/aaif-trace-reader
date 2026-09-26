@@ -7,7 +7,6 @@ outputs are sorted by their canonical form.
 
 from __future__ import annotations
 
-import hashlib
 import json
 from dataclasses import dataclass, field
 
@@ -111,17 +110,17 @@ def build(records: list[SpanRecord], mapping: dict) -> Tables:
         key = (scope if scope is not None else UNRESOLVED, rule["kind"], nid)
         _place(t, rec, rule, key, scope, placed, defaults, correlations)
 
-    # Keyless records get a display label that is stable under permutation and
-    # renaming. It is not an identity and joins nothing (identity rule 2).
+    # Keyless records are rendered by a display handle (DESIGN.md section 4,
+    # revision 7): the least of the record's own outgoing references, and an
+    # ordinal in the canonical order of content. Never a locator, never a hash,
+    # and it joins nothing (identity rule 2).
     groups: dict = {}
     for rec, rule, scope, placed in pending_keyless:
-        groups.setdefault((rule["kind"], _content(rec)), []).append((rec, rule, scope, placed))
-    for (kind, content), members in sorted(groups.items()):
-        base = hashlib.sha256(content.encode()).hexdigest()[:16]
-        members.sort(key=lambda m: m[0].locator.render())
+        groups.setdefault((rule["kind"], _anchor(rec, rule, scope)), []).append((rec, rule, scope, placed))
+    for (kind, anchor), members in sorted(groups.items()):
+        members.sort(key=lambda m: _content(m[0]))
         for i, (rec, rule, scope, placed) in enumerate(members, 1):
-            label = base if len(members) == 1 else f"{base}~{i}"
-            key = (KEYLESS, kind, label)
+            key = (KEYLESS, kind, f"{anchor}#{i}")
             t.losses.append({"locator": rec.locator, "record": key, "what": f"no native id ({rule['native_id'] or 'none mapped'}); kept keyless, joins nothing", "question": _question_for(kind)})
             _place(t, rec, rule, key, scope, placed, defaults, correlations)
 
@@ -140,6 +139,16 @@ def build(records: list[SpanRecord], mapping: dict) -> Tables:
                 slot["methods"].add(method)
                 slot["locators"].update({exloc, efloc})
     return t
+
+
+def _anchor(rec: SpanRecord, rule, scope) -> str:
+    anchors = []
+    for ref in rule.get("references", []):
+        v = rec.attrs.get(ref["attribute"])
+        tscope = _target_scope(ref["target_scope"], scope)
+        if v and v[0] == "str" and v[1] and scope is not None and tscope is not None:
+            anchors.append(f"{ref['relation']}:{tscope}/{ref['target_kind']}/{v[1]}")
+    return min(anchors) if anchors else "unanchored"
 
 
 def _question_for(kind):

@@ -17,7 +17,8 @@ from pathlib import Path
 from . import REGISTER_VERSION, TOOLING
 from .answer import all_entries, unplaced_losses
 from .model import build, canon
-from .parse import MAX_DEPTH, MAX_INPUT_BYTES, MAX_RECORDS, ParseFailure, digest, load_json, spans_from_otlp
+from . import parse
+from .parse import CapBreach, ParseFailure, digest, load_json, spans_from_otlp
 
 CONTRACT = {
     "pr": "aaif/wg-observability-and-traceability#51",
@@ -43,22 +44,38 @@ def read(inputs: list[tuple[str, bytes]], mapping_raw: bytes):
         "mapping_sha256": digest(mapping_raw),
         "mapping_id": mapping.get("mapping_id"),
         "inputs": sorted(({"sha256": digest(raw), "bytes": len(raw)} for _, raw in inputs), key=canon),
-        "caps": {"max_input_bytes": MAX_INPUT_BYTES, "max_depth": MAX_DEPTH, "max_records": MAX_RECORDS, "hit": []},
+        "caps": {"max_input_bytes": parse.MAX_INPUT_BYTES, "max_depth": parse.MAX_DEPTH, "max_records": parse.MAX_RECORDS, "hit": []},
     }
     records = []
-    try:
-        for member, raw in inputs:
+    for member, raw in inputs:
+        try:
             records.extend(spans_from_otlp(raw, member))
-    except ParseFailure as exc:
-        run["processing"] = {"status": "failed", "reason": str(exc)}
-        return {"processing": "failed", "entries": []}, run
+        except CapBreach as exc:
+            # A cap breach marks processing partial and suppresses every
+            # export-level conclusion; it never looks like a clean read.
+            run["caps"]["hit"].append(str(exc))
+        except ParseFailure as exc:
+            run["processing"] = {"status": "failed", "reason": str(exc)}
+            return {"processing": "failed", "entries": []}, run
+    if len(records) > parse.MAX_RECORDS:
+        # Nothing is dropped: which records a cut would keep depends on arrival
+        # order (IC-1). The breach is recorded and every conclusion suppressed.
+        run["caps"]["hit"].append(f"record count over cap {parse.MAX_RECORDS}")
     tables = build(records, mapping)
-    run["processing"] = {"status": "complete"}
-    report = {
-        "processing": "complete",
-        "entries": all_entries(tables),
-        "unplaced_losses": unplaced_losses(tables),
-    }
+    entries = all_entries(tables)
+    if run["caps"]["hit"]:
+        run["processing"] = {"status": "partial", "reasons": sorted(run["caps"]["hit"])}
+        entries = [
+            {"question": e["question"], "subject": e["subject"], "status": "not_evaluated", "answer": None,
+             "missing": ["processing partial: a cap was hit, so no export-level conclusion is drawn"],
+             "conflicts": [], "losses": [], "basis": []}
+            for e in entries
+        ]
+        status = "partial"
+    else:
+        run["processing"] = {"status": "complete"}
+        status = "complete"
+    report = {"processing": status, "entries": entries, "unplaced_losses": unplaced_losses(tables)}
     return report, run
 
 
@@ -85,7 +102,7 @@ def main(argv=None) -> int:
     out.mkdir(parents=True, exist_ok=True)
     (out / "report.json").write_text(canon(report) + "\n", encoding="utf-8")
     (out / "run.json").write_text(canon(run) + "\n", encoding="utf-8")
-    return 0 if report["processing"] == "complete" else 2
+    return {"complete": 0, "partial": 3}.get(report["processing"], 2)
 
 
 if __name__ == "__main__":
