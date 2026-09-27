@@ -1,0 +1,165 @@
+{
+  "processing": "complete",
+  "entries": [
+    {
+      "question": "approvals",
+      "subject": [
+        "support-agent",
+        "proposed_action",
+        "P1"
+      ],
+      "status": "established",
+      "answer": {
+        "decisions": [],
+        "executions": [
+          [
+            "KEYLESS",
+            "tool_execution",
+            "R5:support-agent/proposed_action/P1#1"
+          ]
+        ]
+      },
+      "missing": [],
+      "conflicts": [],
+      "losses": [
+        [
+          [
+            "KEYLESS",
+            "tool_execution",
+            "R5:support-agent/proposed_action/P1#1"
+          ],
+          "attribute 'evidence.externally_verified' has no placement in the mapping"
+        ],
+        [
+          [
+            "KEYLESS",
+            "tool_execution",
+            "R5:support-agent/proposed_action/P1#1"
+          ],
+          "no native id (none mapped); kept keyless, joins nothing"
+        ]
+      ],
+      "basis": [
+        "ae4f61fe06dd:records.otlp.json:1",
+        "ae4f61fe06dd:records.otlp.json:2"
+      ],
+      "decision_count": 0,
+      "decisions_recorded": [],
+      "enforcement": "unknown",
+      "executed": "established",
+      "relations": [
+        {
+          "execution": [
+            "KEYLESS",
+            "tool_execution",
+            "R5:support-agent/proposed_action/P1#1"
+          ],
+          "decision": "unknown"
+        }
+      ]
+    },
+    {
+      "question": "calls",
+      "subject": [
+        "support-agent",
+        "turn",
+        "T1"
+      ],
+      "status": "unknown",
+      "answer": {
+        "calls": []
+      },
+      "missing": [
+        "model call records referencing this turn (R2); unexported calls are unknown, not zero"
+      ],
+      "conflicts": [],
+      "losses": [],
+      "basis": [
+        "ae4f61fe06dd:records.otlp.json:0"
+      ]
+    },
+    {
+      "question": "continuity",
+      "subject": [
+        "support-agent",
+        "conversation",
+        "C1"
+      ],
+      "status": "established",
+      "answer": {
+        "turns": [
+          [
+            "support-agent",
+            "turn",
+            "T1"
+          ]
+        ],
+        "memberships": [
+          {
+            "turn": [
+              "support-agent",
+              "turn",
+              "T1"
+            ],
+            "methods": [
+              "attribute-reference"
+            ],
+            "deliveries": 1
+          }
+        ],
+        "order": "not_answered",
+        "order_reason": "no ordering relation among R1 to R6; timestamps and span trees do not establish order (contract line 91)",
+        "state": "not_answered"
+      },
+      "missing": [],
+      "conflicts": [],
+      "losses": [],
+      "basis": [
+        "ae4f61fe06dd:records.otlp.json:0"
+      ]
+    },
+    {
+      "question": "effects",
+      "subject": [
+        "KEYLESS",
+        "tool_execution",
+        "R5:support-agent/proposed_action/P1#1"
+      ],
+      "status": "unknown",
+      "answer": {
+        "effects": [],
+        "execution": "established"
+      },
+      "missing": [
+        "an external effect correlated to this execution (R6); a missing receipt makes the effect unknown, not absent (contract line 108)"
+      ],
+      "conflicts": [],
+      "losses": [
+        [
+          [
+            "KEYLESS",
+            "tool_execution",
+            "R5:support-agent/proposed_action/P1#1"
+          ],
+          "attribute 'evidence.externally_verified' has no placement in the mapping"
+        ],
+        [
+          [
+            "KEYLESS",
+            "tool_execution",
+            "R5:support-agent/proposed_action/P1#1"
+          ],
+          "no native id (none mapped); kept keyless, joins nothing"
+        ]
+      ],
+      "basis": [
+        "ae4f61fe06dd:records.otlp.json:2"
+      ]
+    }
+  ],
+  "unplaced_losses": [],
+  "scope": {
+    "status": "supported",
+    "answer_document": "https://github.com/aaif/wg-observability-and-traceability/issues/42"
+  }
+}

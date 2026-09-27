@@ -1,0 +1,22 @@
+{
+  "contract": {
+    "pr": "aaif/wg-observability-and-traceability#51",
+    "head": "e82abf1e58b066c586c25767edfba862c4ebd027",
+    "file_sha256": "745dc261d4cf12358a74ac4e9fe942aa85d8b1d85e514896f3a6026b9d08b0b4",
+    "version": "v0.7-draft"
+  },
+  "mapping_sha256": "6b46ac9eefa7b1ce7430b45ec8c702b5f54e22495370b515063d1cd9cefe1d8f",
+  "inputs": [
+    {
+      "sha256": "1363389e03ae5a3656e092d6f92c51e04ef20500ddfde10a4cca2de7a3e7c9d0",
+      "bytes": 4752
+    }
+  ],
+  "processing": {
+    "status": "not_evaluated"
+  },
+  "basis_sha256": "0a01fdb2c9399f977e6d25bdc3d9a395c9fe96ff39c77041b2bc7d98c424754d",
+  "scope_register": "PR57 basis registry revision 1; see BASIS-RERUN.md",
+  "reader_commit": "6582b65d8addbe3f8dc2d6ed992110ea85dcac8c",
+  "kit_commit": "8fa732e3ec597e04a8b667c3669d3ac537e3e98a"
+}

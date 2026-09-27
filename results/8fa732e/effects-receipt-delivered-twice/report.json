@@ -1,0 +1,183 @@
+{
+  "processing": "complete",
+  "entries": [
+    {
+      "question": "approvals",
+      "subject": [
+        "support-agent",
+        "proposed_action",
+        "P1"
+      ],
+      "status": "established",
+      "answer": {
+        "decisions": [],
+        "executions": [
+          [
+            "KEYLESS",
+            "tool_execution",
+            "R5:support-agent/proposed_action/P1#1"
+          ]
+        ]
+      },
+      "missing": [],
+      "conflicts": [],
+      "losses": [
+        [
+          [
+            "KEYLESS",
+            "tool_execution",
+            "R5:support-agent/proposed_action/P1#1"
+          ],
+          "attribute 'evidence.externally_verified' has no placement in the mapping"
+        ],
+        [
+          [
+            "KEYLESS",
+            "tool_execution",
+            "R5:support-agent/proposed_action/P1#1"
+          ],
+          "no native id (none mapped); kept keyless, joins nothing"
+        ]
+      ],
+      "basis": [
+        "2d70c9c518a1:records.otlp.json:1",
+        "2d70c9c518a1:records.otlp.json:2"
+      ],
+      "decision_count": 0,
+      "decisions_recorded": [],
+      "enforcement": "unknown",
+      "executed": "established",
+      "relations": [
+        {
+          "execution": [
+            "KEYLESS",
+            "tool_execution",
+            "R5:support-agent/proposed_action/P1#1"
+          ],
+          "decision": "unknown"
+        }
+      ]
+    },
+    {
+      "question": "calls",
+      "subject": [
+        "support-agent",
+        "turn",
+        "T1"
+      ],
+      "status": "unknown",
+      "answer": {
+        "calls": []
+      },
+      "missing": [
+        "model call records referencing this turn (R2); unexported calls are unknown, not zero"
+      ],
+      "conflicts": [],
+      "losses": [],
+      "basis": [
+        "2d70c9c518a1:records.otlp.json:0"
+      ]
+    },
+    {
+      "question": "continuity",
+      "subject": [
+        "support-agent",
+        "conversation",
+        "C1"
+      ],
+      "status": "established",
+      "answer": {
+        "turns": [
+          [
+            "support-agent",
+            "turn",
+            "T1"
+          ]
+        ],
+        "memberships": [
+          {
+            "turn": [
+              "support-agent",
+              "turn",
+              "T1"
+            ],
+            "methods": [
+              "attribute-reference"
+            ],
+            "deliveries": 1
+          }
+        ],
+        "order": "not_answered",
+        "order_reason": "no ordering relation among R1 to R6; timestamps and span trees do not establish order (contract line 91)",
+        "state": "not_answered"
+      },
+      "missing": [],
+      "conflicts": [],
+      "losses": [],
+      "basis": [
+        "2d70c9c518a1:records.otlp.json:0"
+      ]
+    },
+    {
+      "question": "effects",
+      "subject": [
+        "KEYLESS",
+        "tool_execution",
+        "R5:support-agent/proposed_action/P1#1"
+      ],
+      "status": "established",
+      "answer": {
+        "effects": [
+          {
+            "effect": [
+              "test-ticket-service",
+              "external_effect",
+              "R-1"
+            ],
+            "count": 1,
+            "deliveries": 2
+          }
+        ],
+        "execution": "established"
+      },
+      "missing": [],
+      "conflicts": [],
+      "losses": [
+        [
+          [
+            "KEYLESS",
+            "tool_execution",
+            "R5:support-agent/proposed_action/P1#1"
+          ],
+          "attribute 'evidence.externally_verified' has no placement in the mapping"
+        ],
+        [
+          [
+            "KEYLESS",
+            "tool_execution",
+            "R5:support-agent/proposed_action/P1#1"
+          ],
+          "no native id (none mapped); kept keyless, joins nothing"
+        ],
+        [
+          [
+            "test-ticket-service",
+            "external_effect",
+            "R-1"
+          ],
+          "attribute 'receipt.signature' has no placement in the mapping"
+        ]
+      ],
+      "basis": [
+        "2d70c9c518a1:records.otlp.json:2",
+        "2d70c9c518a1:records.otlp.json:3",
+        "2d70c9c518a1:records.otlp.json:4"
+      ]
+    }
+  ],
+  "unplaced_losses": [],
+  "scope": {
+    "status": "supported",
+    "answer_document": "https://github.com/aaif/wg-observability-and-traceability/issues/42"
+  }
+}

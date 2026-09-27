@@ -1,0 +1,34 @@
+{
+  "contract": {
+    "pr": "aaif/wg-observability-and-traceability#51",
+    "head": "e82abf1e58b066c586c25767edfba862c4ebd027",
+    "file_sha256": "745dc261d4cf12358a74ac4e9fe942aa85d8b1d85e514896f3a6026b9d08b0b4",
+    "version": "v0.7-draft"
+  },
+  "register_version": "DESIGN.md revision 7 (da76f63)",
+  "tooling": {
+    "language": "Python 3.12+ (developed on CPython 3.14.3), standard library only",
+    "assistance": "Written with an AI coding assistant, Claude Opus 5.5 (claude-opus-5-5), directed and reviewed by the maintainer"
+  },
+  "mapping_sha256": "6b46ac9eefa7b1ce7430b45ec8c702b5f54e22495370b515063d1cd9cefe1d8f",
+  "mapping_id": "aaif-test-kit-pr57-8fa732e",
+  "inputs": [
+    {
+      "sha256": "ae4f61fe06dd1b1a0e0b2c797f8f9fff814ced080e7fb15b0e3a634207412442",
+      "bytes": 2828
+    }
+  ],
+  "caps": {
+    "max_input_bytes": 16777216,
+    "max_depth": 64,
+    "max_records": 100000,
+    "hit": []
+  },
+  "processing": {
+    "status": "complete"
+  },
+  "basis_sha256": "ea5ed80796ff8f0d23a809b9d6ebfaa87aebb8923da5d84ca7e6d85eba934cd7",
+  "scope_register": "PR57 basis registry revision 1; see BASIS-RERUN.md",
+  "reader_commit": "6582b65d8addbe3f8dc2d6ed992110ea85dcac8c",
+  "kit_commit": "8fa732e3ec597e04a8b667c3669d3ac537e3e98a"
+}

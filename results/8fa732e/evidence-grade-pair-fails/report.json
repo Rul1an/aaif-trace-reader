@@ -1,0 +1,8 @@
+{
+  "processing": "not_evaluated",
+  "entries": [],
+  "scope": {
+    "status": "outside_supported_contract",
+    "answer_document": "https://github.com/aaif/wg-observability-and-traceability/blob/41e6eacc2fc6bf783f45d873c3d01eb7dd0f9560/working-documents/agent-mcp-server-boundary-deep-dive.md"
+  }
+}
