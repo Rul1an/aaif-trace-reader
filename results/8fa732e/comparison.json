@@ -1,0 +1,198 @@
+{
+  "method": "manual field-by-field assessment of frozen reports; not the general section 7 comparator",
+  "frozen_report_commit": "9f1c0fb",
+  "signature_result_commit": "bf39cb2",
+  "overall_pass": null,
+  "rows": [
+    {
+      "case": "effects-receipt-delivered-twice",
+      "expected_sha256": "5bd41c48eeee0d2d3bf34ca07191a2f255bf15a16503b2479296fd4ca8fe4533",
+      "expected": {
+        "action": "P1",
+        "effect": "confirmed",
+        "confirmed_tickets": [
+          "T-1042"
+        ],
+        "externally_verified": true
+      },
+      "scope": {
+        "status": "supported",
+        "answer_document": "https://github.com/aaif/wg-observability-and-traceability/issues/42"
+      },
+      "reader_effect_entries": [
+        {
+          "question": "effects",
+          "subject": [
+            "KEYLESS",
+            "tool_execution",
+            "R5:support-agent/proposed_action/P1#1"
+          ],
+          "status": "established",
+          "answer": {
+            "effects": [
+              {
+                "effect": [
+                  "test-ticket-service",
+                  "external_effect",
+                  "R-1"
+                ],
+                "count": 1,
+                "deliveries": 2
+              }
+            ],
+            "execution": "established"
+          },
+          "missing": [],
+          "conflicts": [],
+          "losses": [
+            [
+              [
+                "KEYLESS",
+                "tool_execution",
+                "R5:support-agent/proposed_action/P1#1"
+              ],
+              "attribute 'evidence.externally_verified' has no placement in the mapping"
+            ],
+            [
+              [
+                "KEYLESS",
+                "tool_execution",
+                "R5:support-agent/proposed_action/P1#1"
+              ],
+              "no native id (none mapped); kept keyless, joins nothing"
+            ],
+            [
+              [
+                "test-ticket-service",
+                "external_effect",
+                "R-1"
+              ],
+              "attribute 'receipt.signature' has no placement in the mapping"
+            ]
+          ],
+          "basis": [
+            "2d70c9c518a1:records.otlp.json:2",
+            "2d70c9c518a1:records.otlp.json:3",
+            "2d70c9c518a1:records.otlp.json:4"
+          ]
+        }
+      ],
+      "comparison_disposition": "partial_semantic_agreement_not_full_match",
+      "field_notes": [
+        "effect: established with one effect corresponds to confirmed, unknown corresponds to unconfirmed; this is a declared semantic comparison, not byte equality",
+        "confirmed_tickets: reader reports scoped receipt identity and count, not ticket_id; exact ticket list is not established by the report",
+        "externally_verified: no corresponding v0.7 reader field; the separate signature check must not be substituted",
+        "action: reader uses an execution display anchor with an R5 proposal reference, not the kit flat action field"
+      ],
+      "unscored_reader_questions": [
+        "approvals",
+        "calls",
+        "continuity"
+      ]
+    },
+    {
+      "case": "effects-receipt-missing",
+      "expected_sha256": "7177ec87fb3f8865b35de6d19f0c9f710815babdb90736dba76ce58f0c20af4f",
+      "expected": {
+        "action": "P1",
+        "effect": "unconfirmed",
+        "confirmed_tickets": null,
+        "externally_verified": false
+      },
+      "scope": {
+        "status": "supported",
+        "answer_document": "https://github.com/aaif/wg-observability-and-traceability/issues/42"
+      },
+      "reader_effect_entries": [
+        {
+          "question": "effects",
+          "subject": [
+            "KEYLESS",
+            "tool_execution",
+            "R5:support-agent/proposed_action/P1#1"
+          ],
+          "status": "unknown",
+          "answer": {
+            "effects": [],
+            "execution": "established"
+          },
+          "missing": [
+            "an external effect correlated to this execution (R6); a missing receipt makes the effect unknown, not absent (contract line 108)"
+          ],
+          "conflicts": [],
+          "losses": [
+            [
+              [
+                "KEYLESS",
+                "tool_execution",
+                "R5:support-agent/proposed_action/P1#1"
+              ],
+              "attribute 'evidence.externally_verified' has no placement in the mapping"
+            ],
+            [
+              [
+                "KEYLESS",
+                "tool_execution",
+                "R5:support-agent/proposed_action/P1#1"
+              ],
+              "no native id (none mapped); kept keyless, joins nothing"
+            ]
+          ],
+          "basis": [
+            "ae4f61fe06dd:records.otlp.json:2"
+          ]
+        }
+      ],
+      "comparison_disposition": "partial_semantic_agreement_not_full_match",
+      "field_notes": [
+        "effect: established with one effect corresponds to confirmed, unknown corresponds to unconfirmed; this is a declared semantic comparison, not byte equality",
+        "confirmed_tickets: reader reports scoped receipt identity and count, not ticket_id; exact ticket list is not established by the report",
+        "externally_verified: no corresponding v0.7 reader field; the separate signature check must not be substituted",
+        "action: reader uses an execution display anchor with an R5 proposal reference, not the kit flat action field"
+      ],
+      "unscored_reader_questions": [
+        "approvals",
+        "calls",
+        "continuity"
+      ]
+    },
+    {
+      "case": "evidence-grade-pair-fails",
+      "expected_sha256": "7177ec87fb3f8865b35de6d19f0c9f710815babdb90736dba76ce58f0c20af4f",
+      "expected": {
+        "action": "P1",
+        "effect": "unconfirmed",
+        "confirmed_tickets": null,
+        "externally_verified": false
+      },
+      "scope": {
+        "status": "outside_supported_contract",
+        "answer_document": "https://github.com/aaif/wg-observability-and-traceability/blob/41e6eacc2fc6bf783f45d873c3d01eb7dd0f9560/working-documents/agent-mcp-server-boundary-deep-dive.md"
+      },
+      "reader_effect_entries": [],
+      "comparison_disposition": "excluded_not_a_pass",
+      "field_notes": [],
+      "unscored_reader_questions": []
+    },
+    {
+      "case": "evidence-grade-pair-verifies",
+      "expected_sha256": "5bd41c48eeee0d2d3bf34ca07191a2f255bf15a16503b2479296fd4ca8fe4533",
+      "expected": {
+        "action": "P1",
+        "effect": "confirmed",
+        "confirmed_tickets": [
+          "T-1042"
+        ],
+        "externally_verified": true
+      },
+      "scope": {
+        "status": "outside_supported_contract",
+        "answer_document": "https://github.com/aaif/wg-observability-and-traceability/blob/41e6eacc2fc6bf783f45d873c3d01eb7dd0f9560/working-documents/agent-mcp-server-boundary-deep-dive.md"
+      },
+      "reader_effect_entries": [],
+      "comparison_disposition": "excluded_not_a_pass",
+      "field_notes": [],
+      "unscored_reader_questions": []
+    }
+  ]
+}

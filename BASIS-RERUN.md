@@ -33,3 +33,10 @@ all four new cases then failed with missing scope, before scope implementation.
 58 tests passed with `python3 -m unittest discover -s tests -v` and all 16
 existing mutants were killed by assertion failures. Bare unittest discovery
 found zero tests; it is not counted as validation.
+
+## Result
+
+See results/8fa732e/README.md and comparison.json. The frozen reader results
+precede expected-file inspection. The later manual comparison found a remaining
+externally_verified meaning question and a ticket-list representation gap;
+no full conformance pass is claimed. No external response was sent.
