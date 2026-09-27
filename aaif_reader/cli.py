@@ -28,7 +28,7 @@ CONTRACT = {
 }
 
 
-def read(inputs: list[tuple[str, bytes]], mapping_raw: bytes):
+def _read(inputs: list[tuple[str, bytes]], mapping_raw: bytes, basis_raw: bytes | None = None):
     """Pure function from (member name, bytes) pairs to (report, run) dicts.
 
     Member names become source locators and nothing else.
@@ -79,6 +79,42 @@ def read(inputs: list[tuple[str, bytes]], mapping_raw: bytes):
     return report, run
 
 
+CONTRACT_URL = "https://github.com/aaif/wg-observability-and-traceability/blob/e82abf1e58b066c586c25767edfba862c4ebd027/working-documents/AGENT-BEHAVIOR-TRACE-MODEL-CONTRACT.md"
+PAIR_URL = "https://github.com/aaif/wg-observability-and-traceability/blob/41e6eacc2fc6bf783f45d873c3d01eb7dd0f9560/working-documents/agent-mcp-server-boundary-deep-dive.md"
+ISSUE42_URL = "https://github.com/aaif/wg-observability-and-traceability/issues/42"
+
+
+def read(inputs, mapping_raw, basis_raw=None):
+    """An optional case-level scope gate; outside hints never decide scope.
+
+    This registry is the reader's interpretation, not WG metadata authority.
+    Legacy callers without a basis retain their explicit contract-only mode.
+    """
+    if basis_raw is None:
+        return _read(inputs, mapping_raw)
+    try:
+        basis = load_json(basis_raw)
+        follows = basis.get("answer_follows", {}) if isinstance(basis, dict) else {}
+        url = follows.get("url") if isinstance(follows, dict) else None
+        secondary = follows.get("also_stated_in", {}) if isinstance(follows, dict) else {}
+        supported = url == CONTRACT_URL or (url == ISSUE42_URL and isinstance(secondary, dict) and secondary.get("url") == CONTRACT_URL)
+        status = "supported" if supported else "outside_supported_contract" if url == PAIR_URL else "unknown_basis"
+    except ParseFailure:
+        url, status = None, "invalid_basis"
+    scope = {"status": status, "answer_document": url}
+    if status == "supported":
+        report, run = _read(inputs, mapping_raw)
+    else:
+        report = {"processing": "not_evaluated", "entries": []}
+        run = {"contract": CONTRACT, "mapping_sha256": digest(mapping_raw),
+               "inputs": sorted([{"sha256": digest(raw), "bytes": len(raw)} for _, raw in inputs], key=canon),
+               "processing": {"status": "not_evaluated"}}
+    report["scope"] = scope
+    run["basis_sha256"] = digest(basis_raw)
+    run["scope_register"] = "PR57 basis registry revision 1; see BASIS-RERUN.md"
+    return report, run
+
+
 def reader_commit() -> str:
     try:
         here = Path(__file__).resolve().parent
@@ -93,16 +129,17 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="aaif_reader")
     ap.add_argument("--mapping", required=True)
     ap.add_argument("--out", required=True)
+    ap.add_argument("--basis", help="Explicit case basis; never inferred from a filename")
     ap.add_argument("inputs", nargs="+")
     a = ap.parse_args(argv)
     inputs = [(Path(p).name, Path(p).read_bytes()) for p in a.inputs]
-    report, run = read(inputs, Path(a.mapping).read_bytes())
+    report, run = read(inputs, Path(a.mapping).read_bytes(), Path(a.basis).read_bytes() if a.basis else None)
     run["reader_commit"] = reader_commit()
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
     (out / "report.json").write_text(canon(report) + "\n", encoding="utf-8")
     (out / "run.json").write_text(canon(run) + "\n", encoding="utf-8")
-    return {"complete": 0, "partial": 3}.get(report["processing"], 2)
+    return {"complete": 0, "partial": 3, "not_evaluated": 4}.get(report["processing"], 2)
 
 
 if __name__ == "__main__":
