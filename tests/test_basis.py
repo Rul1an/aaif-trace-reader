@@ -30,3 +30,14 @@ class BasisTests(unittest.TestCase):
         r = self.run_basis({'answer_follows': {}})
         self.assertEqual(r.get('scope', {}).get('status'), 'unknown_basis')
         self.assertEqual(r['entries'], [])
+
+    def test_issue42_requires_pinned_secondary(self):
+        issue = 'https://github.com/aaif/wg-observability-and-traceability/issues/42'
+        r = self.run_basis({'answer_follows': {'url': issue, 'also_stated_in': {'url': CONTRACT_URL}}})
+        self.assertEqual(r['scope']['status'], 'supported')
+        self.assertTrue(r['entries'])
+        for secondary in ({}, {'url': CONTRACT_URL.replace('e82abf1e58b066c586c25767edfba862c4ebd027', 'main')}, None):
+            with self.subTest(secondary=secondary):
+                r = self.run_basis({'answer_follows': {'url': issue, 'also_stated_in': secondary}})
+                self.assertEqual(r['scope']['status'], 'unknown_basis')
+                self.assertEqual(r['entries'], [])
