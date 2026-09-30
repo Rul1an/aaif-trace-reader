@@ -56,3 +56,25 @@ contract reader and are reported as losses; neither is read as a result.
 `tests.log`: 73 tests pass. `mutants.log`: 22/22 must-fail mutants killed by an
 assertion failure, including b1 to b6 for the per-check gate and the R6 source
 scope. The frozen 8fa732e reports reproduce as identical JSON under this reader.
+
+## Comparison with the expected answers (after the freeze at c298e7d)
+
+Opened after `c298e7d` was pushed. Field by field (`comparison.json`); no
+whole-case pass is claimed.
+
+| Case | action | effect | confirmed_tickets | receipt_signature_verified |
+| --- | --- | --- | --- | --- |
+| receipt twice | match | match (confirmed) | not scored | not asked, not expected |
+| receipt missing | match | match (unconfirmed) | not scored (kit: null) | not asked, not expected |
+| pair fails | match | match (confirmed) | not scored | match (false) |
+| pair verifies | match | match (confirmed) | not scored | match (true) |
+
+- `effect`: the reader says `established` / `unknown`; the kit says `confirmed` /
+  `unconfirmed`. Both words are the contract's own (lines 108 and 109: "one
+  confirmed effect"; a missing observation is unknown, "creation unconfirmed").
+- `confirmed_tickets`: the report carries effect identity (`receipt.id`) and a
+  count, not ticket ids. It shows one distinct effect where the kit lists one
+  ticket and none where the kit gives `null`, but the list itself is not in the
+  report and was not reconstructed after the freeze.
+- The kit's `externally_verified` field (8fa732e) is gone; the signature result
+  is now its own field, which is what this reader reports separately.
