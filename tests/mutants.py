@@ -95,6 +95,32 @@ MUTANTS = [
      '        run["caps"]["hit"].append(f"record count over cap {parse.MAX_RECORDS}")\n'
      '        records = records[: parse.MAX_RECORDS]\n',
      ["tests.test_reader.ParsingContract.test_record_count_over_cap_is_partial"]),
+    # Basis registry revision 2 (kit 4a028675ef): scope per named check.
+    ("b1", "ignore the per-check basis and use answer_follows for every check", R + "cli.py",
+     'basis.get(c + "_follows", follows)',
+     'follows',
+     ["tests.test_basis_checks.PerCheckBasis.test_pair_shape_answers_correlation_and_not_signature"]),
+    ("b2", "let an outside hint exclude a check", R + "cli.py",
+     '        url, status = _classify(basis.get(c + "_follows", follows))\n',
+     '        url, status = _classify(basis.get(c + "_follows", follows))\n'
+     '        status = "outside_supported_contract" if isinstance(follows, dict) and "outside" in follows else status\n',
+     ["tests.test_basis_checks.PerCheckBasis.test_outside_hint_never_excludes_a_supported_check"]),
+    ("b3", "answer the signature check under the contract", R + "cli.py",
+     '        if c != CONTRACT_CHECK and status == "supported":',
+     '        if False:',
+     ["tests.test_basis_checks.PerCheckBasis.test_signature_is_never_a_contract_answer_even_if_basis_names_the_contract"]),
+    ("b4", "admit the contract read when any check is supported", R + "cli.py",
+     '    admitted = per.get(CONTRACT_CHECK, {}).get("status") == "supported"',
+     '    admitted = any(v["status"] in ("supported", "no_contract_rule") for v in per.values())',
+     ["tests.test_basis_checks.PerCheckBasis.test_no_correlation_check_means_no_contract_answers"]),
+    ("b5", "accept duplicate check names", R + "cli.py",
+     '            or len(set(checks)) != len(checks)):',
+     '            or False):',
+     ["tests.test_basis_checks.PerCheckBasis.test_malformed_checks_are_invalid"]),
+    ("b6", "let a receipt from another service inherit the R6 default", R + "model.py",
+     '        if "source_scope" in c and scope != c["source_scope"]:',
+     '        if False:',
+     ["tests.test_mapping_4a02867.KitMapping.test_other_service_does_not_inherit_r6"]),
 ]
 
 

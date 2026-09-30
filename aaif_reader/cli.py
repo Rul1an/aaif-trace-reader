@@ -84,6 +84,51 @@ PAIR_URL = "https://github.com/aaif/wg-observability-and-traceability/blob/41e6e
 ISSUE42_URL = "https://github.com/aaif/wg-observability-and-traceability/issues/42"
 
 
+KNOWN_CHECKS = ("effect_correlation", "receipt_signature")
+CONTRACT_CHECK = "effect_correlation"
+
+
+def _classify(follows):
+    """Registry lookup for one basis object; only pinned URLs are recognised."""
+    if not isinstance(follows, dict):
+        return None, "unknown_basis"
+    url = follows.get("url")
+    secondary = follows.get("also_stated_in")
+    if url == CONTRACT_URL or (url == ISSUE42_URL and isinstance(secondary, dict) and secondary.get("url") == CONTRACT_URL):
+        return url, "supported"
+    return url, "outside_supported_contract" if url == PAIR_URL else "unknown_basis"
+
+
+def _scope(basis):
+    """Revision 1 without `checks`; revision 2 decides scope per named check.
+
+    `outside` and every other hint are ignored: scope comes from the registry.
+    Only the contract check is answered by this reader; the signature check is
+    never a contract answer (contract line 112) and is reported separately.
+    """
+    if not isinstance(basis, dict):
+        return {"status": "unknown_basis", "answer_document": None}, False
+    follows = basis.get("answer_follows", {})
+    if "checks" not in basis:
+        url, status = _classify(follows)
+        return {"status": status, "answer_document": url}, status == "supported"
+    checks = basis["checks"]
+    if (not isinstance(checks, list) or not checks or not all(isinstance(c, str) for c in checks)
+            or len(set(checks)) != len(checks)):
+        return {"status": "invalid_basis", "answer_document": None}, False
+    per = {}
+    for c in checks:
+        if c not in KNOWN_CHECKS:
+            per[c] = {"status": "unknown_check", "answer_document": None}
+            continue
+        url, status = _classify(basis.get(c + "_follows", follows))
+        if c != CONTRACT_CHECK and status == "supported":
+            status = "no_contract_rule"
+        per[c] = {"status": status, "answer_document": url}
+    admitted = per.get(CONTRACT_CHECK, {}).get("status") == "supported"
+    return {"status": "per_check", "checks": per}, admitted
+
+
 def read(inputs, mapping_raw, basis_raw=None):
     """An optional case-level scope gate; outside hints never decide scope.
 
@@ -93,16 +138,10 @@ def read(inputs, mapping_raw, basis_raw=None):
     if basis_raw is None:
         return _read(inputs, mapping_raw)
     try:
-        basis = load_json(basis_raw)
-        follows = basis.get("answer_follows", {}) if isinstance(basis, dict) else {}
-        url = follows.get("url") if isinstance(follows, dict) else None
-        secondary = follows.get("also_stated_in", {}) if isinstance(follows, dict) else {}
-        supported = url == CONTRACT_URL or (url == ISSUE42_URL and isinstance(secondary, dict) and secondary.get("url") == CONTRACT_URL)
-        status = "supported" if supported else "outside_supported_contract" if url == PAIR_URL else "unknown_basis"
+        scope, admitted = _scope(load_json(basis_raw))
     except ParseFailure:
-        url, status = None, "invalid_basis"
-    scope = {"status": status, "answer_document": url}
-    if status == "supported":
+        scope, admitted = {"status": "invalid_basis", "answer_document": None}, False
+    if admitted:
         report, run = _read(inputs, mapping_raw)
     else:
         report = {"processing": "not_evaluated", "entries": []}
@@ -111,7 +150,7 @@ def read(inputs, mapping_raw, basis_raw=None):
                "processing": {"status": "not_evaluated"}}
     report["scope"] = scope
     run["basis_sha256"] = digest(basis_raw)
-    run["scope_register"] = "PR57 basis registry revision 1; see BASIS-RERUN.md"
+    run["scope_register"] = "PR57 basis registry revision 2; see BASIS-RERUN-4a02867.md"
     return report, run
 
 

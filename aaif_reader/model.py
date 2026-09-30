@@ -280,6 +280,9 @@ def _place(t, rec, rule, key, scope, placed, defaults, correlations):
         v = rec.attrs.get(c["attribute"])
         if not v or v[0] != "str" or not v[1]:
             continue
+        if "source_scope" in c and scope != c["source_scope"]:
+            t.losses.append({"locator": rec.locator, "record": key, "what": f"{c['relation']} correlation key outside the mapping's declared source scope", "question": q})
+            continue
         kscope = _target_scope(c["key_scope"], scope)
         if kscope is None:
             t.losses.append({"locator": rec.locator, "record": key, "what": f"{c['relation']} correlation key with unresolved scope", "question": q})
