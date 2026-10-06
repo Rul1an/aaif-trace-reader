@@ -1,6 +1,6 @@
 # Known-answer repair validation — 6 October 2026
 
-Execution source and reproduction runner: `a9ad3186d157b9f8aed9a7cea68800d77b6f6287`.
+Initial execution source and reproduction runner: `a9ad3186d157b9f8aed9a7cea68800d77b6f6287`.
 Kit: `b6587950986eb4ec501e080cc9730fd21dcb69fa`; contract remains v0.7-draft.
 Reader source unchanged from `3ab914a31cb013ba6760c6bab0d3a2cb56ee4733`.
 Run by Codex for Roel; CPython 3.14.3, cryptography 46.0.7. Original reader
@@ -49,3 +49,15 @@ production identity, complete exports or whole-contract coverage. R1/R5/R6 mappi
 is shared kit material, not independently invented semantics. No other reader's
 implementation was imported. This does not establish full Task 7 completion:
 relationship coverage, real example exports and the general comparator remain open.
+
+## Final provenance repair
+
+Review found that the initial runner did not include its input manifest in the
+clean-source guard. A regression first failed by accepting a locally rewritten
+manifest; the repaired runner rejects it without a comparison output. No reader
+semantics changed. Final run at `59b3a06db120605479367608f438ff756a91f37e` is in `verified-run/`;
+all six effect/ticket fields and two signature fields match again.
+`verified-tests.log` records 92 passing tests. The 33-mutant result above targets
+unchanged reader source. The original `run/` remains the earlier repair attempt.
+The new GitHub Reader validation workflow runs tests, mutants and the bounded
+rerun; its live result is distinct from these local logs.
