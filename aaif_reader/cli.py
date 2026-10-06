@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 
 from . import REGISTER_VERSION, TOOLING
-from .answer import all_entries, unplaced_losses
+from .answer import all_entries, query, unplaced_losses
 from .model import build, canon
 from . import parse
 from .parse import CapBreach, ParseFailure, digest, load_json, spans_from_otlp
@@ -28,7 +28,7 @@ CONTRACT = {
 }
 
 
-def _read(inputs: list[tuple[str, bytes]], mapping_raw: bytes, basis_raw: bytes | None = None):
+def _read(inputs: list[tuple[str, bytes]], mapping_raw: bytes, basis_raw: bytes | None = None, ctx=None):
     """Pure function from (member name, bytes) pairs to (report, run) dicts.
 
     Member names become source locators and nothing else.
@@ -76,7 +76,21 @@ def _read(inputs: list[tuple[str, bytes]], mapping_raw: bytes, basis_raw: bytes 
         run["processing"] = {"status": "complete"}
         status = "complete"
     report = {"processing": status, "entries": entries, "unplaced_losses": unplaced_losses(tables)}
+    if ctx is not None:
+        if not _valid_context(ctx):
+            report["query"] = {"status": "invalid_context"}
+        elif status != "complete":
+            report["query"] = {"status": "not_evaluated", "context": ctx}
+        else:
+            report["query"] = query(tables, ctx)
     return report, run
+
+
+def _valid_context(ctx):
+    return (isinstance(ctx, dict) and set(ctx) == {"action", "service", "tenant"}
+            and isinstance(ctx["action"], str) and ctx["action"]
+            and isinstance(ctx["service"], str) and ctx["service"]
+            and (ctx["tenant"] is None or (isinstance(ctx["tenant"], str) and ctx["tenant"])))
 
 
 CONTRACT_URL = "https://github.com/aaif/wg-observability-and-traceability/blob/e82abf1e58b066c586c25767edfba862c4ebd027/working-documents/AGENT-BEHAVIOR-TRACE-MODEL-CONTRACT.md"
@@ -137,12 +151,16 @@ def read(inputs, mapping_raw, basis_raw=None):
     """
     if basis_raw is None:
         return _read(inputs, mapping_raw)
+    ctx = None
     try:
-        scope, admitted = _scope(load_json(basis_raw))
+        parsed = load_json(basis_raw)
+        scope, admitted = _scope(parsed)
+        if isinstance(parsed, dict) and "evaluation_context" in parsed:
+            ctx = parsed["evaluation_context"]
     except ParseFailure:
         scope, admitted = {"status": "invalid_basis", "answer_document": None}, False
     if admitted:
-        report, run = _read(inputs, mapping_raw)
+        report, run = _read(inputs, mapping_raw, ctx=ctx)
     else:
         report = {"processing": "not_evaluated", "entries": []}
         run = {"contract": CONTRACT, "mapping_sha256": digest(mapping_raw),
@@ -150,7 +168,8 @@ def read(inputs, mapping_raw, basis_raw=None):
                "processing": {"status": "not_evaluated"}}
     report["scope"] = scope
     run["basis_sha256"] = digest(basis_raw)
-    run["scope_register"] = "PR57 basis registry revision 2; see BASIS-RERUN-4a02867.md"
+    run["scope_register"] = ("PR57 basis registry revision 3 (evaluation_context); see BASIS-RERUN-b658795.md"
+                             if ctx is not None else "PR57 basis registry revision 2; see BASIS-RERUN-4a02867.md")
     return report, run
 
 

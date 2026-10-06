@@ -1,0 +1,123 @@
+{
+  "mapping_id": "aaif-test-kit-pr57-b658795",
+  "applies_to": "b6587950986eb4ec501e080cc9730fd21dcb69fa",
+  "notes": [
+    "This file encodes the kit's own test-kit/mapping.md at b6587950, which keeps the R1, R5 and R6 defaults of 4a028675ef and changes R6 to join and deduplicate on receipt.id within the service and tenant scope.",
+    "Scope is the issuing system read from resource attribute service.name, qualified by resource attribute tenant.id where a record carries one (identity rule 4, contract line 49). A record without tenant.id has the unqualified system scope, as at 4a028675ef. The kit's mapping.md says tenant.id is a fixture choice for the scope representation the draft leaves open; this file reads it only because that mapping.md names it.",
+    "A qualified scope is rendered system@tenant. A service.name or tenant.id containing '@' is an unreadable scope (a loss), so the rendering is never ambiguous.",
+    "R6 on a receipt still applies only in test-ticket-service (source_scope compares the system part). receipt.action_id is read as a reference to the proposed action issued by support-agent in the receipt's own tenant (key_scope tenant same_as_source); the system name support-agent stays this reader's declaration (FINDINGS F4).",
+    "answer_fields names receipt.ticket_id, so an effect view reports the ticket ids its receipt records state (kit README: a count or receipt id alone cannot answer the ticket-id question). Different ticket ids on one receipt key are kept as observations and the effect count becomes conflict, never a chosen value.",
+    "evidence.externally_verified and receipt.signature stay unplaced, as at 4a028675ef."
+  ],
+  "scope": {
+    "from": "resource_attribute",
+    "key": "service.name",
+    "tenant_key": "tenant.id"
+  },
+  "delivery_fields": [
+    "traceId",
+    "spanId",
+    "parentSpanId",
+    "startTimeUnixNano",
+    "endTimeUnixNano"
+  ],
+  "default_methods": {
+    "R1": "attribute-reference",
+    "R5": "attribute-reference",
+    "R6": "external-correlation-key"
+  },
+  "entities": [
+    {
+      "kind": "turn",
+      "span_name": {
+        "exact": "invoke_agent"
+      },
+      "native_id": "turn.id",
+      "observations": [],
+      "references": [
+        {
+          "relation": "R1",
+          "attribute": "conversation.id",
+          "target_kind": "conversation",
+          "target_scope": {
+            "same_as_source": true
+          }
+        }
+      ]
+    },
+    {
+      "kind": "proposed_action",
+      "span_name": {
+        "exact": "propose_action"
+      },
+      "native_id": "action.id",
+      "observations": [
+        "action.intent"
+      ],
+      "references": []
+    },
+    {
+      "kind": "tool_execution",
+      "span_name": {
+        "prefix": "execute_tool "
+      },
+      "native_id": null,
+      "observations": [
+        "tool.name"
+      ],
+      "references": [
+        {
+          "relation": "R5",
+          "attribute": "action.id",
+          "target_kind": "proposed_action",
+          "target_scope": {
+            "same_as_source": true
+          }
+        }
+      ],
+      "correlation_keys": [
+        {
+          "relation": "R6",
+          "attribute": "action.id",
+          "key_kind": "proposed_action",
+          "key_scope": {
+            "same_as_source": true
+          }
+        }
+      ]
+    },
+    {
+      "kind": "external_effect",
+      "span_name": {
+        "exact": "ticket.create.receipt"
+      },
+      "native_id": "receipt.id",
+      "observations": [
+        "receipt.action_id",
+        "receipt.ticket_id",
+        "receipt.created_at",
+        "receipt.service"
+      ],
+      "references": [],
+      "correlation_keys": [
+        {
+          "relation": "R6",
+          "attribute": "receipt.action_id",
+          "key_kind": "proposed_action",
+          "key_scope": {
+            "declared": "support-agent",
+            "tenant": "same_as_source"
+          },
+          "source_scope": "test-ticket-service"
+        }
+      ],
+      "answer_fields": {
+        "ticket_ids": "receipt.ticket_id"
+      }
+    }
+  ],
+  "source": {
+    "document": "test-kit/mapping.md at kit b6587950",
+    "sha256": "1a5ca0d2d1da687cd707a1e6ab3aea57c993c4668fabd3084a1e35e0dd032229"
+  }
+}

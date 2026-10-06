@@ -40,6 +40,7 @@ class Tables:
     relations: dict = field(default_factory=dict)      # (rel, src, tgt) -> {"methods": set, "locators": set}
     losses: list = field(default_factory=list)         # dicts
     contents: dict = field(default_factory=dict)       # key -> {content_canon: set(Locator)}
+    answer_fields: dict = field(default_factory=dict)  # kind -> {answer name: attribute}, from the mapping
     record_key: dict = field(default_factory=dict)     # Locator -> key
     decision_outcomes: dict = field(default_factory=dict)  # key -> {content_canon: "denied"|"approved"|"other:<v>"}
     call_records: dict = field(default_factory=dict)       # key -> {content_canon: {"outcome", "counters", "declared"}}
@@ -55,18 +56,50 @@ def _match(rule, name: str) -> bool:
 
 
 def _scope(mapping, rec: SpanRecord):
+    """The issuing system, qualified by the tenant where the mapping names a
+    tenant attribute and the record carries one (identity rule 4, line 49).
+
+    A qualified scope renders system@tenant; with a tenant key declared, a
+    system or tenant containing '@' is unreadable, so the rendering is never
+    ambiguous. Without a tenant key the scope is the system, as before.
+    """
     s = mapping["scope"]
-    if s.get("from") == "resource_attribute":
-        v = rec.resource.get(s["key"])
-        if v and v[0] == "str" and v[1]:
-            return v[1]
-    return None
+    if s.get("from") != "resource_attribute":
+        return None
+    v = rec.resource.get(s["key"])
+    if not (v and v[0] == "str" and v[1]):
+        return None
+    system = v[1]
+    tkey = s.get("tenant_key")
+    if tkey is None:
+        return system
+    if "@" in system:
+        return None
+    tv = rec.resource.get(tkey)
+    if tv is None:
+        return system
+    if not (tv[0] == "str" and tv[1]) or "@" in tv[1]:
+        return None
+    return f"{system}@{tv[1]}"
+
+
+def system_of(scope):
+    return scope.split("@", 1)[0] if scope else None
+
+
+def tenant_of(scope):
+    return scope.split("@", 1)[1] if scope and "@" in scope else None
 
 
 def _target_scope(spec, source_scope):
     if spec.get("same_as_source"):
         return source_scope
     if "declared" in spec:
+        if spec.get("tenant") == "same_as_source":
+            if source_scope is None:
+                return None
+            tenant = tenant_of(source_scope)
+            return spec["declared"] + (f"@{tenant}" if tenant else "")
         return spec["declared"]
     return None
 
@@ -82,6 +115,7 @@ def _content(rec: SpanRecord) -> str:
 
 def build(records: list[SpanRecord], mapping: dict) -> Tables:
     t = Tables()
+    t.answer_fields = {r["kind"]: r["answer_fields"] for r in mapping["entities"] if r.get("answer_fields")}
     defaults = mapping.get("default_methods", {})
     pending_keyless = []   # (rec, rule, scope)
     correlations = []      # (rel, key_triple, role, owner_key or rec, locator)
@@ -280,7 +314,7 @@ def _place(t, rec, rule, key, scope, placed, defaults, correlations):
         v = rec.attrs.get(c["attribute"])
         if not v or v[0] != "str" or not v[1]:
             continue
-        if "source_scope" in c and scope != c["source_scope"]:
+        if "source_scope" in c and system_of(scope) != c["source_scope"]:
             t.losses.append({"locator": rec.locator, "record": key, "what": f"{c['relation']} correlation key outside the mapping's declared source scope", "question": q})
             continue
         kscope = _target_scope(c["key_scope"], scope)
