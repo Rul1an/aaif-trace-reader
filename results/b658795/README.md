@@ -31,3 +31,11 @@ fails case's signature does not cover those bytes. Validity under a synthetic
 key is not evidence of a real service or effect.
 
 84 tests pass (`tests.log`), 28/28 mutants killed (`mutants.log`).
+
+## After the freeze
+
+The expected files were opened after commit `f48a01d` and compared in
+`comparison.json`: action, effect and confirmed tickets match in all six cases,
+and the separate signature check matches both pair cases. One representation
+difference is recorded rather than smoothed over: with the effect unknown, the
+reader emitted `ticket_ids: []` where the kit expects `null` (FINDINGS F5).

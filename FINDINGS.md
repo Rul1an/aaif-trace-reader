@@ -100,3 +100,14 @@ section 8's exhaustive limit of nine, so it runs 300 seeded shuffles.
 
 Not done yet: the comparator (section 7). Writing it means opening the kit's `expected.json` files for
 the first time, and the comparison runs once per pinned fixture revision (section 10 step 5).
+
+## After the b6587950 comparison (2026-10-06)
+
+**F5. An unknown effect reports an empty ticket list, not an absent one.** In
+`effects-receipt-missing` the frozen query answer at `f48a01d` carries `ticket_ids: []`
+beside `status: unknown`; the kit's expected answer is `confirmed_tickets: null`. Read on
+its own, an empty list says no ticket was created, which a missing receipt does not establish
+(contract line 108). The comparison (`results/b658795/comparison.json`) maps the field to null
+only because the status is unknown, and says so. This is this reader's defect, not the kit's;
+the fix is to emit null whenever the effect is not established, with a test and a mutant, in a
+revision after this frozen run rather than inside it.
