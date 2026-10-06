@@ -140,6 +140,25 @@ class FrozenRegression(unittest.TestCase):
             frozen = (ROOT / "results" / "4a02867" / case / "report.json").read_text()
             self.assertEqual(canon(report) + "\n", frozen, case)
 
+    def _rerun(self, kit_sha, mapping, results):
+        kit = ROOT / "inputs" / f"test-kit-{kit_sha}" / "cases"
+        m = (ROOT / "mappings" / mapping).read_bytes()
+        for case in sorted(p.name for p in kit.iterdir()):
+            b = kit / case / "basis.json"
+            report, _ = read([("records.otlp.json", (kit / case / "records.otlp.json").read_bytes())], m,
+                             basis_raw=b.read_bytes() if b.exists() else None)
+            yield case, report, (ROOT / "results" / results / case / "report.json").read_text()
+
+    def test_afc26fdd_reports_unchanged(self):
+        for case, report, frozen in self._rerun("afc26fdd2199844bf7dff23879739e941fa81107", "test-kit-afc26fdd.json", "afc26fdd"):
+            self.assertEqual(canon(report) + "\n", frozen, case)
+
+    def test_8fa732e_reports_unchanged_in_content(self):
+        # These frozen files are written in another byte layout; they already
+        # differed in bytes, not content, at 5036716, so content is what is pinned.
+        for case, report, frozen in self._rerun("8fa732e3ec597e04a8b667c3669d3ac537e3e98a", "test-kit-8fa732e.json", "8fa732e"):
+            self.assertEqual(report, json.loads(frozen), case)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -188,8 +188,10 @@ def _decision_verdict(t, decision):
 
 def _observed(t: Tables, key, attribute):
     """Every string value the records state for one attribute of one key, sorted.
-    Two different values are both kept; none is chosen (line 111)."""
-    return sorted({tv[1] for (kk, name, tv) in t.observations if kk == key and name == attribute and tv[0] == "str"})
+    Two different values are both kept; none is chosen (line 111). No stated
+    value is unknown (null), never an empty list (review finding 2)."""
+    values = sorted({tv[1] for (kk, name, tv) in t.observations if kk == key and name == attribute and tv[0] == "str"})
+    return values or None
 
 
 def _effect_view(t: Tables, ef):
@@ -255,14 +257,19 @@ def query(t: Tables, ctx):
     same tenant. No receipt makes the effect unknown, not absent (line 108).
     """
     action, service, tenant = ctx["action"], ctx["service"], ctx["tenant"]
-    targets = {key for key, e in t.entities.items()
-               if e["kind"] == "proposed_action" and key[2] == action
-               and key[0] not in (KEYLESS, UNRESOLVED) and tenant_of(key[0]) == tenant}
-    r5 = [r for r in _rels(t, "R5") if r[2] in targets
-          or (r[2][1] == "proposed_action" and r[2][2] == action and tenant_of(r[2][0]) == tenant)]
+    ts = t.tenant_scoped
+
+    def is_target(key):
+        # The queried action as issued by a system the mapping declares for
+        # R6 keys, in the queried tenant; never an unresolved or keyless scope.
+        return (key[1] == "proposed_action" and key[2] == action
+                and key[0] not in (KEYLESS, UNRESOLVED) and tenant_of(key[0], ts) == tenant
+                and (not t.action_systems or system_of(key[0], ts) in t.action_systems))
+
+    r5 = [r for r in _rels(t, "R5") if is_target(r[2])]
     executions = sorted({r[1] for r in r5}, key=canon)
     r6 = [r for r in _rels(t, "R6") if r[1] in executions
-          and system_of(r[2][0]) == service and tenant_of(r[2][0]) == tenant]
+          and system_of(r[2][0], ts) == service and tenant_of(r[2][0], ts) == tenant]
     efs = sorted({r[2] for r in r6}, key=canon)
     views = [_effect_view(t, ef)[0] for ef in efs]
     names = sorted(t.answer_fields.get("external_effect", {}))
@@ -272,16 +279,22 @@ def query(t: Tables, ctx):
            "effects": views}
     # F5: with no effect established, the answer fields are unknown (null), never
     # an empty list, which would read as "none created" (contract line 108).
+    # An effect that states no value leaves the field unknown too (finding 2).
     for name in names:
-        out[name] = sorted({v for view in views for v in view[name]}) if efs else None
+        if not efs or any(view[name] is None for view in views):
+            out[name] = None
+        else:
+            out[name] = sorted({v for view in views for v in view[name]})
     if not efs:
         out["status"] = "unknown"
         out["missing"] = ["an external effect from the queried service in the queried scope, correlated to an execution of the queried action (R6); a missing receipt makes the effect unknown, not absent (contract line 108)"]
         if not executions:
             out["missing"].append("an execution referencing the queried action in the queried scope (R5)")
     else:
-        out["status"] = "conflict" if all(v["count"] == "conflict" for v in views) else "established"
-        out["missing"] = []
+        # One conflicting effect makes the answer a conflict: its values must not
+        # reach the answer as if confirmed (review finding 3).
+        out["status"] = "conflict" if any(v["count"] == "conflict" for v in views) else "established"
+        out["missing"] = [f"a stated {name} on every correlated effect" for name in names if out[name] is None]
     out["basis"] = _basis(t, executions + efs, r5 + r6)
     return out
 

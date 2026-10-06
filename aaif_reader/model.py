@@ -41,6 +41,8 @@ class Tables:
     losses: list = field(default_factory=list)         # dicts
     contents: dict = field(default_factory=dict)       # key -> {content_canon: set(Locator)}
     answer_fields: dict = field(default_factory=dict)  # kind -> {answer name: attribute}, from the mapping
+    tenant_scoped: bool = False                        # the mapping declares a tenant key; only then is '@' a separator
+    action_systems: set = field(default_factory=set)   # declared issuing systems of proposed actions referenced by R6 keys
     record_key: dict = field(default_factory=dict)     # Locator -> key
     decision_outcomes: dict = field(default_factory=dict)  # key -> {content_canon: "denied"|"approved"|"other:<v>"}
     call_records: dict = field(default_factory=dict)       # key -> {content_canon: {"outcome", "counters", "declared"}}
@@ -83,22 +85,28 @@ def _scope(mapping, rec: SpanRecord):
     return f"{system}@{tv[1]}"
 
 
-def system_of(scope):
-    return scope.split("@", 1)[0] if scope else None
+def system_of(scope, tenant_scoped):
+    """The system part of a scope. Only a tenant-scoped mapping uses '@' as a
+    separator; without one, '@' is part of the name (review finding 1)."""
+    if not scope:
+        return None
+    return scope.split("@", 1)[0] if tenant_scoped else scope
 
 
-def tenant_of(scope):
-    return scope.split("@", 1)[1] if scope and "@" in scope else None
+def tenant_of(scope, tenant_scoped):
+    if not (scope and tenant_scoped and "@" in scope):
+        return None
+    return scope.split("@", 1)[1]
 
 
-def _target_scope(spec, source_scope):
+def _target_scope(spec, source_scope, tenant_scoped=False):
     if spec.get("same_as_source"):
         return source_scope
     if "declared" in spec:
         if spec.get("tenant") == "same_as_source":
             if source_scope is None:
                 return None
-            tenant = tenant_of(source_scope)
+            tenant = tenant_of(source_scope, tenant_scoped)
             return spec["declared"] + (f"@{tenant}" if tenant else "")
         return spec["declared"]
     return None
@@ -116,6 +124,9 @@ def _content(rec: SpanRecord) -> str:
 def build(records: list[SpanRecord], mapping: dict) -> Tables:
     t = Tables()
     t.answer_fields = {r["kind"]: r["answer_fields"] for r in mapping["entities"] if r.get("answer_fields")}
+    t.tenant_scoped = "tenant_key" in mapping.get("scope", {})
+    t.action_systems = {c["key_scope"]["declared"] for r in mapping["entities"] for c in r.get("correlation_keys", [])
+                        if c.get("key_kind") == "proposed_action" and "declared" in c.get("key_scope", {})}
     defaults = mapping.get("default_methods", {})
     pending_keyless = []   # (rec, rule, scope)
     correlations = []      # (rel, key_triple, role, owner_key or rec, locator)
@@ -314,10 +325,10 @@ def _place(t, rec, rule, key, scope, placed, defaults, correlations):
         v = rec.attrs.get(c["attribute"])
         if not v or v[0] != "str" or not v[1]:
             continue
-        if "source_scope" in c and system_of(scope) != c["source_scope"]:
+        if "source_scope" in c and system_of(scope, t.tenant_scoped) != c["source_scope"]:
             t.losses.append({"locator": rec.locator, "record": key, "what": f"{c['relation']} correlation key outside the mapping's declared source scope", "question": q})
             continue
-        kscope = _target_scope(c["key_scope"], scope)
+        kscope = _target_scope(c["key_scope"], scope, t.tenant_scoped)
         if kscope is None:
             t.losses.append({"locator": rec.locator, "record": key, "what": f"{c['relation']} correlation key with unresolved scope", "question": q})
             continue
