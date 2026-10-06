@@ -27,8 +27,12 @@ What the kit's `mapping.md` changed at b6587950, and how this reader encodes it:
   `conflict`. This closes the gap stated in our 4a02867 report ("my report
   carries the receipt identity and a count rather than ticket ids").
 
-Order of work: tests first (red: 8 of 10), implementation, 84 tests and 28/28
-mutants (b7 to b12 are new; b9 first survived and gained a test where the
-mapping joins across tenants, so the query's own tenant filter is exercised).
-Then results frozen and committed before any expected.json at this revision is
-opened; expected files were fetched and hashed only.
+Order of work, as the author reports it: tests first (8 of 10 red), then the
+implementation, 84 tests and 28/28 mutants (b9 first survived and gained a test
+where the mapping joins across tenants). Tests and implementation landed in one
+commit (`2d7d3ba`), so the history cannot show the red step or the b9 survival.
+Results were committed (`f48a01d`) before, by the author's account, any
+expected.json at this revision was opened; commit order shows only the order of
+commits. This is a targeted run, not a blind evaluation: the reader was changed
+for the two new cases with their records and the kit README's stated outcomes in
+view. Independent review later found four defects, fixed in `1d3c66c` (F6).

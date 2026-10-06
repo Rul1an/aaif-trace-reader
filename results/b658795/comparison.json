@@ -5,8 +5,7 @@
   "opened_after_freeze": true,
   "answer_blind": false,
   "answer_blind_note": "the kit README states each intended outcome",
-  "overall": "every compared field matches in all six cases under the stated mappings; no whole-case pass claimed beyond these fields",
-  "representation_note": "In effects-receipt-missing the reader's ticket_ids is [] beside status unknown, while the kit's confirmed_tickets is null. Read alone, [] could pass for zero tickets created, which contract line 108 says a missing receipt does not establish. The comparison maps it to null only because status is unknown; the reader should emit null itself. Recorded as FINDINGS F5, not fixed in the frozen run.",
+  "overall": "action and effect match in all six cases (action largely by construction, see notes); confirmed_tickets matches in five of six, and not in effects-receipt-missing (F5); the separate signature check matches both pair cases. A targeted run, not a blind evaluation.",
   "rows": [
     {
       "case": "effects-action-id-reused-in-another-scope",
@@ -36,7 +35,7 @@
       "fields": {
         "action": {
           "match": true,
-          "note": "execution established through R5 on proposal P1 in the queried scope"
+          "note": "the reader echoes the queried action from evaluation_context, so this match is largely by construction; the evidence is execution: established through R5 on proposal P1 in the queried scope"
         },
         "effect": {
           "match": true,
@@ -76,7 +75,7 @@
       "fields": {
         "action": {
           "match": true,
-          "note": "execution established through R5 on proposal P1 in the queried scope"
+          "note": "the reader echoes the queried action from evaluation_context, so this match is largely by construction; the evidence is execution: established through R5 on proposal P1 in the queried scope"
         },
         "effect": {
           "match": true,
@@ -106,15 +105,15 @@
       "fields": {
         "action": {
           "match": true,
-          "note": "execution established through R5 on proposal P1 in the queried scope"
+          "note": "the reader echoes the queried action from evaluation_context, so this match is largely by construction; the evidence is execution: established through R5 on proposal P1 in the queried scope"
         },
         "effect": {
           "match": true,
           "note": "established = confirmed, unknown = unconfirmed (contract lines 108-109)"
         },
         "confirmed_tickets": {
-          "match": true,
-          "note": "reader ticket_ids read as confirmed only when the effect is established; with status unknown the reader emitted [] and the kit expects null (see representation note)"
+          "match": false,
+          "note": "the frozen reader emitted ticket_ids [] beside status unknown; the kit expects null. Not a match: an empty list reads as none created (FINDINGS F5). The first version of this file scored it as a match by mapping [] to null; corrected 2026-10-06 after independent review."
         }
       }
     },
@@ -146,7 +145,7 @@
       "fields": {
         "action": {
           "match": true,
-          "note": "execution established through R5 on proposal P1 in the queried scope"
+          "note": "the reader echoes the queried action from evaluation_context, so this match is largely by construction; the evidence is execution: established through R5 on proposal P1 in the queried scope"
         },
         "effect": {
           "match": true,
@@ -187,7 +186,7 @@
       "fields": {
         "action": {
           "match": true,
-          "note": "execution established through R5 on proposal P1 in the queried scope"
+          "note": "the reader echoes the queried action from evaluation_context, so this match is largely by construction; the evidence is execution: established through R5 on proposal P1 in the queried scope"
         },
         "effect": {
           "match": true,
@@ -232,7 +231,7 @@
       "fields": {
         "action": {
           "match": true,
-          "note": "execution established through R5 on proposal P1 in the queried scope"
+          "note": "the reader echoes the queried action from evaluation_context, so this match is largely by construction; the evidence is execution: established through R5 on proposal P1 in the queried scope"
         },
         "effect": {
           "match": true,
@@ -248,5 +247,13 @@
         }
       }
     }
-  ]
+  ],
+  "corrections": [
+    {
+      "date": "2026-10-06",
+      "by": "author, after independent review",
+      "what": "effects-receipt-missing confirmed_tickets rescored from match to no match; overall restated; action note added"
+    }
+  ],
+  "provenance_note": "Commit order shows only the order in which files were committed here, not when expected files were first opened. That the expected files were opened only after f48a01d is the author's statement. The reader was adapted with the new case records and the kit README's stated outcomes in view, so this is a targeted run, not a blind evaluation."
 }

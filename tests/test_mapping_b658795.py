@@ -1,8 +1,11 @@
 """The kit-declared mapping at b6587950: tenant-qualified scope, ticket ids, and
 the evaluation_context query.
 
-Written before the implementation. Local records only; no kit expected-answer
-file is read. The regression test reruns the frozen 4a028675ef reports, which
+Written before the implementation by the author's account; the history has
+tests and implementation in one commit (2d7d3ba). The two F5 assertions
+(assertIsNone) were changed after the kit's expected answers had been read, so
+they are fitted to that key and not pre-registered. Local records only; no
+kit expected-answer file is read by these tests. The regression test reruns the frozen 4a028675ef reports, which
 were frozen by this reader before any expected answer at that revision was read.
 """
 import json
