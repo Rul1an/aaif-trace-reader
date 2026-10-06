@@ -1,0 +1,34 @@
+m1       killed   drop scope from the key -> test_c4_same_receipt_id_in_second_service
+m2       killed   index with overwrite instead of multi-value -> test_c10_two_receipts_same_key_different_content
+m3       killed   sum usage across aggregation levels -> test_c5_two_levels_without_declared_aggregation
+m4       killed   drop an execution when its decision is a denial -> test_c6_execution_references_the_denial_it_followed
+m5       killed   compare values with Python == (1 equals 1.0) -> test_c10_int_against_float_is_a_conflict
+m6       killed   resolve an unreferenced execution's decision in arrival order -> test_approvals_invariant_under_shuffle
+m7       killed   read the file name -> test_c9_renamed
+m8       killed   select one decision per proposal -> test_c14_denial_and_approval_no_execution, test_c14a_two_approvals_from_two_policies
+m9       killed   report two decisions on one proposal as a conflict -> test_c14_denial_and_approval_no_execution, test_c14a_two_approvals_from_two_policies
+m10      killed   relate an unreferenced execution to a standing denial as inconsistent -> test_c6b_only_denial_and_no_reference, test_c14b_denial_approval_and_unreferenced_execution
+m11      killed   treat a proposal's only decision as the one an unreferenced execution followed -> test_c6b_only_denial_and_no_reference
+m12      killed   render an unresolved entry from an approval-and-denial template -> test_c14c_two_approvals_and_unreferenced_execution
+m13      killed   relate an unreferenced execution to each approval as consistent -> test_c14c_two_approvals_and_unreferenced_execution
+c-cap    killed   fail instead of marking processing partial on a cap breach -> test_size_over_cap_is_partial_not_clean, test_cap_breach_suppresses_every_conclusion
+c-hash   killed   label a keyless subject by a content hash -> test_handle_is_anchor_and_ordinal
+c-trunc  killed   truncate records by arrival order on a count breach -> test_record_count_over_cap_is_partial
+b1       killed   ignore the per-check basis and use answer_follows for every check -> test_pair_shape_answers_correlation_and_not_signature
+b2       killed   let an outside hint exclude a check -> test_outside_hint_never_excludes_a_supported_check
+b3       killed   answer the signature check under the contract -> test_signature_is_never_a_contract_answer_even_if_basis_names_the_contract
+b4       killed   admit the contract read when any check is supported -> test_no_correlation_check_means_no_contract_answers
+b5       killed   accept duplicate check names -> test_malformed_checks_are_invalid
+b6       killed   let a receipt from another service inherit the R6 default -> test_other_service_does_not_inherit_r6
+b7       killed   drop the tenant from the scope -> test_queried_tenant_confirms_only_its_own_ticket, test_same_receipt_key_in_two_tenants_is_two_effects_not_a_conflict
+b8       killed   compare the whole qualified scope against the declared receipt service -> test_queried_tenant_confirms_only_its_own_ticket
+b9       killed   ignore the tenant when selecting effects for a query -> test_query_keeps_the_tenant_even_when_the_mapping_joins_across_it
+b10      killed   resolve a receipt reference in the agent's scope without its tenant -> test_queried_tenant_confirms_only_its_own_ticket
+b11      killed   keep only one ticket id per receipt -> test_conflicting_ticket_ids_on_one_receipt_are_kept
+b12      killed   allow the scope separator inside a system name -> test_separator_in_scope_is_unreadable
+b13      killed   report an unknown effect's answer fields as an empty list (F5) -> test_missing_receipt_is_unknown_not_absent
+r1       killed   split on '@' without a declared tenant key (review finding 1) -> test_1_lookalike_service_does_not_inherit_r6_under_old_mapping
+r2       killed   report an unstated answer field as an empty list (review finding 2) -> test_2_established_effect_without_ticket_id_is_not_an_empty_list
+r3       killed   call it a conflict only when every effect conflicts (review finding 3) -> test_3_one_conflicting_effect_makes_the_answer_a_conflict
+r4       killed   count executions of any issuing system (review finding 4) -> test_4_executions_are_those_of_the_declared_issuing_system
+33/33 killed by an assertion failure

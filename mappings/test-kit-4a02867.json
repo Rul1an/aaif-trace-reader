@@ -1,0 +1,118 @@
+{
+  "mapping_id": "aaif-test-kit-pr57-4a02867",
+  "applies_to": "4a028675ef9b5727e614762df305f5f037b04b98",
+  "notes": [
+    "This file encodes the kit's own test-kit/mapping.md at 4a028675ef, which declares the R1, R5 and R6 defaults for these four cases (contract section 4 step 2). The three defaults are the kit's declaration, no longer this reader's own choice (FINDINGS F3); they are the same three this reader declared at 8fa732e.",
+    "Scope is read from the resource attribute service.name (IC-3). No tenant is exported.",
+    "R1: invoke_agent turn.id with conversation.id, attribute-reference. R5: propose_action and execute_tool create_ticket share action.id, attribute-reference. R6: execute_tool action.id and the receipt's receipt.action_id, external-correlation-key; the effect is deduplicated on receipt.id within the receipt service.",
+    "kit mapping.md: 'a different service does not inherit this mapping'. Encoded as source_scope test-ticket-service on the receipt's R6 key: a receipt from any other service is still an effect record, but its R6 key is not used.",
+    "receipt.action_id is read as a reference to the proposed-action identity issued by support-agent. kit mapping.md states the fixture has one agent and one test service with no tenant reuse of P1 and does not test cross-scope reuse; the scope name itself is still this reader's declaration (FINDINGS F4).",
+    "kit mapping.md: evidence.externally_verified 'is a claim, not a link method or a verification result'. It stays unplaced and surfaces as a loss. receipt.signature stays unplaced: the contract reader gives it no meaning (contract line 112); the separate signature check reads it."
+  ],
+  "scope": {
+    "from": "resource_attribute",
+    "key": "service.name"
+  },
+  "delivery_fields": [
+    "traceId",
+    "spanId",
+    "parentSpanId",
+    "startTimeUnixNano",
+    "endTimeUnixNano"
+  ],
+  "default_methods": {
+    "R1": "attribute-reference",
+    "R5": "attribute-reference",
+    "R6": "external-correlation-key"
+  },
+  "entities": [
+    {
+      "kind": "turn",
+      "span_name": {
+        "exact": "invoke_agent"
+      },
+      "native_id": "turn.id",
+      "observations": [],
+      "references": [
+        {
+          "relation": "R1",
+          "attribute": "conversation.id",
+          "target_kind": "conversation",
+          "target_scope": {
+            "same_as_source": true
+          }
+        }
+      ]
+    },
+    {
+      "kind": "proposed_action",
+      "span_name": {
+        "exact": "propose_action"
+      },
+      "native_id": "action.id",
+      "observations": [
+        "action.intent"
+      ],
+      "references": []
+    },
+    {
+      "kind": "tool_execution",
+      "span_name": {
+        "prefix": "execute_tool "
+      },
+      "native_id": null,
+      "observations": [
+        "tool.name"
+      ],
+      "references": [
+        {
+          "relation": "R5",
+          "attribute": "action.id",
+          "target_kind": "proposed_action",
+          "target_scope": {
+            "same_as_source": true
+          }
+        }
+      ],
+      "correlation_keys": [
+        {
+          "relation": "R6",
+          "attribute": "action.id",
+          "key_kind": "proposed_action",
+          "key_scope": {
+            "same_as_source": true
+          }
+        }
+      ]
+    },
+    {
+      "kind": "external_effect",
+      "span_name": {
+        "exact": "ticket.create.receipt"
+      },
+      "native_id": "receipt.id",
+      "observations": [
+        "receipt.action_id",
+        "receipt.ticket_id",
+        "receipt.created_at",
+        "receipt.service"
+      ],
+      "references": [],
+      "correlation_keys": [
+        {
+          "relation": "R6",
+          "attribute": "receipt.action_id",
+          "key_kind": "proposed_action",
+          "key_scope": {
+            "declared": "support-agent"
+          },
+          "source_scope": "test-ticket-service"
+        }
+      ]
+    }
+  ],
+  "source": {
+    "document": "test-kit/mapping.md at kit 4a028675ef",
+    "sha256": "7b4036c9c99debf64abf1c221f6292a685db477c44795b20f42eeec6e8763a57"
+  }
+}

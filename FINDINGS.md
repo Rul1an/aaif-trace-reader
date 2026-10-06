@@ -100,3 +100,36 @@ section 8's exhaustive limit of nine, so it runs 300 seeded shuffles.
 
 Not done yet: the comparator (section 7). Writing it means opening the kit's `expected.json` files for
 the first time, and the comparison runs once per pinned fixture revision (section 10 step 5).
+
+## After the b6587950 comparison (2026-10-06)
+
+**F5. An unknown effect reports an empty ticket list, not an absent one.** In
+`effects-receipt-missing` the frozen query answer at `f48a01d` carries `ticket_ids: []`
+beside `status: unknown`; the kit's expected answer is `confirmed_tickets: null`. Read on
+its own, an empty list says no ticket was created, which a missing receipt does not establish
+(contract line 108). The initial comparison mapped the field to null because the status was unknown.
+That normalization has been withdrawn: `results/b658795/comparison.json` now records
+a ticket mismatch for this case (5 of 6 ticket matches). This is this reader's defect, not the kit's;
+the fix is to emit null whenever the effect is not established, with a test and a mutant, in a
+revision after this frozen run rather than inside it.
+
+F5 resolved in the revision after `c774b0e`: the query emits null answer fields whenever no
+effect is established; test `test_missing_receipt_is_unknown_not_absent` and mutant b13 pin it.
+The frozen b6587950 results are not rerun or edited.
+
+The two assertions that pin F5 were changed from `[]` to `None` after the kit's
+expected answers had been read. They are fitted to that answer key, not
+pre-registered.
+
+**F6. Four defects found by independent review of `5036716..5e63b26`, fixed in `1d3c66c`.**
+(1) `system_of` split scopes at `@` even when the mapping declared no tenant key, so under the
+4a02867 mapping a receipt from `test-ticket-service@evil` correlated as if it came from
+`test-ticket-service`; the frozen fixtures could not show this because no name contains `@`.
+(2) An established effect that states no ticket id reported `[]`, the misreading F5 removed for
+unknown effects. (3) A query with one conflicting and one clean effect reported `established`
+with the conflicting values merged in. (4) Query executions were not limited to the declared
+issuing system. Each has a regression test and a mutant. A further guard (an unresolved scope
+matching a tenantless query) has a test but no mutant, because `build()` never creates an R5
+relation with an unresolved target, so no input can kill it. The review also found the
+comparison scored F5 as a match and the order-of-work text stated what the history cannot show;
+both are corrected in place, with the correction recorded.

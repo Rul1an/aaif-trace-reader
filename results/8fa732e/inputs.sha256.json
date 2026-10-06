@@ -1,0 +1,13 @@
+{
+  "README.md": "87285adf75ae4cda11537ab2450f052b38b03a9e52b8899240b1bd1d37c7dd24",
+  "TEMPLATE/mapping.md": "1417e91b6d813113cf8555f0faf62ab67b3b386544c3bb4f7af0e3b8acacd381",
+  "trust/test-ticket-service.pub.pem": "7e2cca85e60abde07c9ca696630a8792f4429fa71a1a7a6b977a6f38e8619da0",
+  "cases/evidence-grade-pair-fails/basis.json": "0a01fdb2c9399f977e6d25bdc3d9a395c9fe96ff39c77041b2bc7d98c424754d",
+  "cases/evidence-grade-pair-fails/records.otlp.json": "1363389e03ae5a3656e092d6f92c51e04ef20500ddfde10a4cca2de7a3e7c9d0",
+  "cases/effects-receipt-delivered-twice/basis.json": "ea5ed80796ff8f0d23a809b9d6ebfaa87aebb8923da5d84ca7e6d85eba934cd7",
+  "cases/effects-receipt-delivered-twice/records.otlp.json": "2d70c9c518a1f08df77ad4aa3d8fc3556f9a14fcda77d86edca1591898d5b5a7",
+  "cases/evidence-grade-pair-verifies/basis.json": "0a01fdb2c9399f977e6d25bdc3d9a395c9fe96ff39c77041b2bc7d98c424754d",
+  "cases/evidence-grade-pair-verifies/records.otlp.json": "5408247a36ed3f3edaf509b9c082f5f47c40f729ab4eddb29272cd3693aa7c4d",
+  "cases/effects-receipt-missing/basis.json": "ea5ed80796ff8f0d23a809b9d6ebfaa87aebb8923da5d84ca7e6d85eba934cd7",
+  "cases/effects-receipt-missing/records.otlp.json": "ae4f61fe06dd1b1a0e0b2c797f8f9fff814ced080e7fb15b0e3a634207412442"
+}

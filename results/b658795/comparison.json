@@ -1,0 +1,259 @@
+{
+  "kit": "b6587950986eb4ec501e080cc9730fd21dcb69fa",
+  "reader": "2d7d3ba",
+  "frozen_results_commit": "f48a01d",
+  "opened_after_freeze": true,
+  "answer_blind": false,
+  "answer_blind_note": "the kit README states each intended outcome",
+  "overall": "action and effect match in all six cases (action largely by construction, see notes); confirmed_tickets matches in five of six, and not in effects-receipt-missing (F5); the separate signature check matches both pair cases. A targeted run, not a blind evaluation.",
+  "rows": [
+    {
+      "case": "effects-action-id-reused-in-another-scope",
+      "expected_sha256": "4203337c2a09e3e92681e57cff8d1527beb0910c444555ba54afc4f1f4834437",
+      "expected": {
+        "action": "P1",
+        "effect": "confirmed",
+        "confirmed_tickets": [
+          "T-1042"
+        ]
+      },
+      "reader": {
+        "status": "established",
+        "execution": "established",
+        "effect_ids": [
+          [
+            "test-ticket-service@tenant-a",
+            "external_effect",
+            "R-9"
+          ]
+        ],
+        "ticket_ids": [
+          "T-1042"
+        ],
+        "signature_valid": null
+      },
+      "fields": {
+        "action": {
+          "match": true,
+          "note": "the reader echoes the queried action from evaluation_context, so this match is largely by construction; the evidence is execution: established through R5 on proposal P1 in the queried scope"
+        },
+        "effect": {
+          "match": true,
+          "note": "established = confirmed, unknown = unconfirmed (contract lines 108-109)"
+        },
+        "confirmed_tickets": {
+          "match": true,
+          "note": "ticket_ids from the correlated receipt in the queried scope"
+        }
+      }
+    },
+    {
+      "case": "effects-receipt-delivered-twice",
+      "expected_sha256": "4203337c2a09e3e92681e57cff8d1527beb0910c444555ba54afc4f1f4834437",
+      "expected": {
+        "action": "P1",
+        "effect": "confirmed",
+        "confirmed_tickets": [
+          "T-1042"
+        ]
+      },
+      "reader": {
+        "status": "established",
+        "execution": "established",
+        "effect_ids": [
+          [
+            "test-ticket-service",
+            "external_effect",
+            "R-1"
+          ]
+        ],
+        "ticket_ids": [
+          "T-1042"
+        ],
+        "signature_valid": null
+      },
+      "fields": {
+        "action": {
+          "match": true,
+          "note": "the reader echoes the queried action from evaluation_context, so this match is largely by construction; the evidence is execution: established through R5 on proposal P1 in the queried scope"
+        },
+        "effect": {
+          "match": true,
+          "note": "established = confirmed, unknown = unconfirmed (contract lines 108-109)"
+        },
+        "confirmed_tickets": {
+          "match": true,
+          "note": "ticket_ids from the correlated receipt in the queried scope"
+        }
+      }
+    },
+    {
+      "case": "effects-receipt-missing",
+      "expected_sha256": "69044eea73a345494b923d2d7b63da3197bd8989fb90d3e78866161ca6b2e47a",
+      "expected": {
+        "action": "P1",
+        "effect": "unconfirmed",
+        "confirmed_tickets": null
+      },
+      "reader": {
+        "status": "unknown",
+        "execution": "established",
+        "effect_ids": [],
+        "ticket_ids": [],
+        "signature_valid": null
+      },
+      "fields": {
+        "action": {
+          "match": true,
+          "note": "the reader echoes the queried action from evaluation_context, so this match is largely by construction; the evidence is execution: established through R5 on proposal P1 in the queried scope"
+        },
+        "effect": {
+          "match": true,
+          "note": "established = confirmed, unknown = unconfirmed (contract lines 108-109)"
+        },
+        "confirmed_tickets": {
+          "match": false,
+          "note": "the frozen reader emitted ticket_ids [] beside status unknown; the kit expects null. Not a match: an empty list reads as none created (FINDINGS F5). The first version of this file scored it as a match by mapping [] to null; corrected 2026-10-06 after independent review."
+        }
+      }
+    },
+    {
+      "case": "effects-ticket-id-changed",
+      "expected_sha256": "bee6ee2b87baa8e6188f2e5f830041cecf4b28b4ec52819cdfa12e2df4befba8",
+      "expected": {
+        "action": "P1",
+        "effect": "confirmed",
+        "confirmed_tickets": [
+          "T-2088"
+        ]
+      },
+      "reader": {
+        "status": "established",
+        "execution": "established",
+        "effect_ids": [
+          [
+            "test-ticket-service",
+            "external_effect",
+            "R-9"
+          ]
+        ],
+        "ticket_ids": [
+          "T-2088"
+        ],
+        "signature_valid": null
+      },
+      "fields": {
+        "action": {
+          "match": true,
+          "note": "the reader echoes the queried action from evaluation_context, so this match is largely by construction; the evidence is execution: established through R5 on proposal P1 in the queried scope"
+        },
+        "effect": {
+          "match": true,
+          "note": "established = confirmed, unknown = unconfirmed (contract lines 108-109)"
+        },
+        "confirmed_tickets": {
+          "match": true,
+          "note": "ticket_ids from the correlated receipt in the queried scope"
+        }
+      }
+    },
+    {
+      "case": "evidence-grade-pair-fails",
+      "expected_sha256": "91f3380776b7ed110f10cf96e491cb762fa4ae1b09d685289562c245daa91c9e",
+      "expected": {
+        "action": "P1",
+        "effect": "confirmed",
+        "confirmed_tickets": [
+          "T-1042"
+        ],
+        "receipt_signature_verified": false
+      },
+      "reader": {
+        "status": "established",
+        "execution": "established",
+        "effect_ids": [
+          [
+            "test-ticket-service",
+            "external_effect",
+            "R-7"
+          ]
+        ],
+        "ticket_ids": [
+          "T-1042"
+        ],
+        "signature_valid": false
+      },
+      "fields": {
+        "action": {
+          "match": true,
+          "note": "the reader echoes the queried action from evaluation_context, so this match is largely by construction; the evidence is execution: established through R5 on proposal P1 in the queried scope"
+        },
+        "effect": {
+          "match": true,
+          "note": "established = confirmed, unknown = unconfirmed (contract lines 108-109)"
+        },
+        "confirmed_tickets": {
+          "match": true,
+          "note": "ticket_ids from the correlated receipt in the queried scope"
+        },
+        "receipt_signature_verified": {
+          "match": true,
+          "note": "separate README-derived Ed25519 check, not the contract reader"
+        }
+      }
+    },
+    {
+      "case": "evidence-grade-pair-verifies",
+      "expected_sha256": "b5fa1767dfa6a2b58fc6d485f71c452cfb7033d151ab2da6b1fd54151f22ce96",
+      "expected": {
+        "action": "P1",
+        "effect": "confirmed",
+        "confirmed_tickets": [
+          "T-1042"
+        ],
+        "receipt_signature_verified": true
+      },
+      "reader": {
+        "status": "established",
+        "execution": "established",
+        "effect_ids": [
+          [
+            "test-ticket-service",
+            "external_effect",
+            "R-7"
+          ]
+        ],
+        "ticket_ids": [
+          "T-1042"
+        ],
+        "signature_valid": true
+      },
+      "fields": {
+        "action": {
+          "match": true,
+          "note": "the reader echoes the queried action from evaluation_context, so this match is largely by construction; the evidence is execution: established through R5 on proposal P1 in the queried scope"
+        },
+        "effect": {
+          "match": true,
+          "note": "established = confirmed, unknown = unconfirmed (contract lines 108-109)"
+        },
+        "confirmed_tickets": {
+          "match": true,
+          "note": "ticket_ids from the correlated receipt in the queried scope"
+        },
+        "receipt_signature_verified": {
+          "match": true,
+          "note": "separate README-derived Ed25519 check, not the contract reader"
+        }
+      }
+    }
+  ],
+  "corrections": [
+    {
+      "date": "2026-10-06",
+      "by": "author, after independent review",
+      "what": "effects-receipt-missing confirmed_tickets rescored from match to no match; overall restated; action note added"
+    }
+  ],
+  "provenance_note": "Commit order shows only the order in which files were committed here, not when expected files were first opened. That the expected files were opened only after f48a01d is the author's statement. The reader was adapted with the new case records and the kit README's stated outcomes in view, so this is a targeted run, not a blind evaluation."
+}

@@ -1,0 +1,40 @@
+{
+  "python": "3.14.3 (main, Feb  3 2026, 15:32:20) [Clang 17.0.0 (clang-1700.6.3.2)]",
+  "cryptography": "46.0.7",
+  "key_sha256": "7e2cca85e60abde07c9ca696630a8792f4429fa71a1a7a6b977a6f38e8619da0",
+  "rows": [
+    {
+      "case": "effects-receipt-delivered-twice",
+      "receipt": "R-1",
+      "signing_bytes_utf8": "{\"action_id\":\"P1\",\"created_at\":\"2026-09-21T15:00:00Z\",\"receipt_id\":\"R-1\",\"service\":\"test-ticket-service\",\"ticket_id\":\"T-1042\"}",
+      "length": 126,
+      "sha256": "343f2b13cbfc16bb97bfa57208b4766699fde19676e876111249a6b25ddaefc7",
+      "signature_valid": true
+    },
+    {
+      "case": "effects-receipt-delivered-twice",
+      "receipt": "R-1",
+      "signing_bytes_utf8": "{\"action_id\":\"P1\",\"created_at\":\"2026-09-21T15:00:00Z\",\"receipt_id\":\"R-1\",\"service\":\"test-ticket-service\",\"ticket_id\":\"T-1042\"}",
+      "length": 126,
+      "sha256": "343f2b13cbfc16bb97bfa57208b4766699fde19676e876111249a6b25ddaefc7",
+      "signature_valid": true
+    },
+    {
+      "case": "evidence-grade-pair-fails",
+      "receipt": "R-7",
+      "signing_bytes_utf8": "{\"action_id\":\"P1\",\"created_at\":\"2026-09-21T15:00:00Z\",\"receipt_id\":\"R-7\",\"service\":\"test-ticket-service\",\"ticket_id\":\"T-1042\"}",
+      "length": 126,
+      "sha256": "194b732ee70ed682521af21c94fcfedd176ea6240e26fecf6fdaeb3df8a19f22",
+      "signature_valid": false
+    },
+    {
+      "case": "evidence-grade-pair-verifies",
+      "receipt": "R-7",
+      "signing_bytes_utf8": "{\"action_id\":\"P1\",\"created_at\":\"2026-09-21T15:00:00Z\",\"receipt_id\":\"R-7\",\"service\":\"test-ticket-service\",\"ticket_id\":\"T-1042\"}",
+      "length": 126,
+      "sha256": "194b732ee70ed682521af21c94fcfedd176ea6240e26fecf6fdaeb3df8a19f22",
+      "signature_valid": true
+    }
+  ],
+  "claim": "Signature validity under the supplied synthetic key only; not actual effects or independence"
+}

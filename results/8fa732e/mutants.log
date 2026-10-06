@@ -1,0 +1,17 @@
+m1       killed   drop scope from the key -> test_c4_same_receipt_id_in_second_service
+m2       killed   index with overwrite instead of multi-value -> test_c10_two_receipts_same_key_different_content
+m3       killed   sum usage across aggregation levels -> test_c5_two_levels_without_declared_aggregation
+m4       killed   drop an execution when its decision is a denial -> test_c6_execution_references_the_denial_it_followed
+m5       killed   compare values with Python == (1 equals 1.0) -> test_c10_int_against_float_is_a_conflict
+m6       killed   resolve an unreferenced execution's decision in arrival order -> test_approvals_invariant_under_shuffle
+m7       killed   read the file name -> test_c9_renamed
+m8       killed   select one decision per proposal -> test_c14_denial_and_approval_no_execution, test_c14a_two_approvals_from_two_policies
+m9       killed   report two decisions on one proposal as a conflict -> test_c14_denial_and_approval_no_execution, test_c14a_two_approvals_from_two_policies
+m10      killed   relate an unreferenced execution to a standing denial as inconsistent -> test_c6b_only_denial_and_no_reference, test_c14b_denial_approval_and_unreferenced_execution
+m11      killed   treat a proposal's only decision as the one an unreferenced execution followed -> test_c6b_only_denial_and_no_reference
+m12      killed   render an unresolved entry from an approval-and-denial template -> test_c14c_two_approvals_and_unreferenced_execution
+m13      killed   relate an unreferenced execution to each approval as consistent -> test_c14c_two_approvals_and_unreferenced_execution
+c-cap    killed   fail instead of marking processing partial on a cap breach -> test_size_over_cap_is_partial_not_clean, test_cap_breach_suppresses_every_conclusion
+c-hash   killed   label a keyless subject by a content hash -> test_handle_is_anchor_and_ordinal
+c-trunc  killed   truncate records by arrival order on a count breach -> test_record_count_over_cap_is_partial
+16/16 killed by an assertion failure

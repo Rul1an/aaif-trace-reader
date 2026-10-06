@@ -1,0 +1,169 @@
+{
+  "kit": "4a028675ef9b5727e614762df305f5f037b04b98",
+  "reader": "951e57e",
+  "frozen_results_commit": "c298e7d",
+  "opened_after_freeze": true,
+  "answer_blind": false,
+  "answer_blind_note": "the kit README states each intended outcome",
+  "overall": "no whole-case pass claimed; see per-field matches",
+  "rows": [
+    {
+      "case": "effects-receipt-delivered-twice",
+      "expected_sha256": "4203337c2a09e3e92681e57cff8d1527beb0910c444555ba54afc4f1f4834437",
+      "expected": {
+        "action": "P1",
+        "effect": "confirmed",
+        "confirmed_tickets": [
+          "T-1042"
+        ]
+      },
+      "reader": {
+        "effect_status": "established",
+        "distinct_effects": 1,
+        "effect_ids": [
+          [
+            "test-ticket-service",
+            "external_effect",
+            "R-1"
+          ]
+        ],
+        "action_anchor": "R5:support-agent/proposed_action/P1#1"
+      },
+      "fields": {
+        "action": {
+          "match": true,
+          "note": "execution is keyless and anchored on proposal P1 through R5 (F4)"
+        },
+        "effect": {
+          "match": true,
+          "note": "vocabulary from contract lines 108-109: established effect = 'confirmed', missing receipt = unknown = 'creation unconfirmed'"
+        },
+        "confirmed_tickets": {
+          "match": "not_scored",
+          "note": "the report carries effect identity (receipt.id) and count, not ticket ids; one distinct effect where the kit lists one ticket, none where it gives null. Not reconstructed after the freeze."
+        },
+        "receipt_signature_verified": {
+          "match": "not_asked",
+          "note": "basis.json does not list receipt_signature; the kit expects no signature field"
+        }
+      }
+    },
+    {
+      "case": "effects-receipt-missing",
+      "expected_sha256": "69044eea73a345494b923d2d7b63da3197bd8989fb90d3e78866161ca6b2e47a",
+      "expected": {
+        "action": "P1",
+        "effect": "unconfirmed",
+        "confirmed_tickets": null
+      },
+      "reader": {
+        "effect_status": "unknown",
+        "distinct_effects": 0,
+        "effect_ids": [],
+        "action_anchor": "R5:support-agent/proposed_action/P1#1"
+      },
+      "fields": {
+        "action": {
+          "match": true,
+          "note": "execution is keyless and anchored on proposal P1 through R5 (F4)"
+        },
+        "effect": {
+          "match": true,
+          "note": "vocabulary from contract lines 108-109: established effect = 'confirmed', missing receipt = unknown = 'creation unconfirmed'"
+        },
+        "confirmed_tickets": {
+          "match": "not_scored",
+          "note": "the report carries effect identity (receipt.id) and count, not ticket ids; one distinct effect where the kit lists one ticket, none where it gives null. Not reconstructed after the freeze."
+        },
+        "receipt_signature_verified": {
+          "match": "not_asked",
+          "note": "basis.json does not list receipt_signature; the kit expects no signature field"
+        }
+      }
+    },
+    {
+      "case": "evidence-grade-pair-fails",
+      "expected_sha256": "91f3380776b7ed110f10cf96e491cb762fa4ae1b09d685289562c245daa91c9e",
+      "expected": {
+        "action": "P1",
+        "effect": "confirmed",
+        "confirmed_tickets": [
+          "T-1042"
+        ],
+        "receipt_signature_verified": false
+      },
+      "reader": {
+        "effect_status": "established",
+        "distinct_effects": 1,
+        "effect_ids": [
+          [
+            "test-ticket-service",
+            "external_effect",
+            "R-7"
+          ]
+        ],
+        "action_anchor": "R5:support-agent/proposed_action/P1#1"
+      },
+      "fields": {
+        "action": {
+          "match": true,
+          "note": "execution is keyless and anchored on proposal P1 through R5 (F4)"
+        },
+        "effect": {
+          "match": true,
+          "note": "vocabulary from contract lines 108-109: established effect = 'confirmed', missing receipt = unknown = 'creation unconfirmed'"
+        },
+        "confirmed_tickets": {
+          "match": "not_scored",
+          "note": "the report carries effect identity (receipt.id) and count, not ticket ids; one distinct effect where the kit lists one ticket, none where it gives null. Not reconstructed after the freeze."
+        },
+        "receipt_signature_verified": {
+          "match": true,
+          "note": "separate README-derived Ed25519 check, not the contract reader"
+        }
+      }
+    },
+    {
+      "case": "evidence-grade-pair-verifies",
+      "expected_sha256": "b5fa1767dfa6a2b58fc6d485f71c452cfb7033d151ab2da6b1fd54151f22ce96",
+      "expected": {
+        "action": "P1",
+        "effect": "confirmed",
+        "confirmed_tickets": [
+          "T-1042"
+        ],
+        "receipt_signature_verified": true
+      },
+      "reader": {
+        "effect_status": "established",
+        "distinct_effects": 1,
+        "effect_ids": [
+          [
+            "test-ticket-service",
+            "external_effect",
+            "R-7"
+          ]
+        ],
+        "action_anchor": "R5:support-agent/proposed_action/P1#1"
+      },
+      "fields": {
+        "action": {
+          "match": true,
+          "note": "execution is keyless and anchored on proposal P1 through R5 (F4)"
+        },
+        "effect": {
+          "match": true,
+          "note": "vocabulary from contract lines 108-109: established effect = 'confirmed', missing receipt = unknown = 'creation unconfirmed'"
+        },
+        "confirmed_tickets": {
+          "match": "not_scored",
+          "note": "the report carries effect identity (receipt.id) and count, not ticket ids; one distinct effect where the kit lists one ticket, none where it gives null. Not reconstructed after the freeze."
+        },
+        "receipt_signature_verified": {
+          "match": true,
+          "note": "separate README-derived Ed25519 check, not the contract reader"
+        }
+      }
+    }
+  ]
+}

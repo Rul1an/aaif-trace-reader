@@ -1,0 +1,31 @@
+name: Reader validation
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  reader-validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: '3.14'
+      - run: python -m pip install cryptography==46.0.7
+      - name: Fetch immutable fixture inputs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          scripts/fetch_kit_at.sh afc26fdd2199844bf7dff23879739e941fa81107
+          scripts/fetch_kit_at.sh 8fa732e3ec597e04a8b667c3669d3ac537e3e98a
+          scripts/fetch_kit_at.sh 4a028675ef9b5727e614762df305f5f037b04b98
+          scripts/fetch_kit_at.sh b6587950986eb4ec501e080cc9730fd21dcb69fa
+      - run: python3 -m unittest discover -s tests -v
+      - run: python3 tests/mutants.py
+      - name: Bounded known-answer rerun
+        run: python3 results/b658795-repaired/reproduce.py "$RUNNER_TEMP/repair-result"
+      - name: Reader remains unchanged after mutation controls
+        run: git diff --exit-code -- aaif_reader
