@@ -13,7 +13,7 @@ from pathlib import Path
 import cryptography
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from check_signing_input import signing_bytes, verifies  # noqa: E402
+from check_signing_input import MalformedSignature, signing_bytes, verifies  # noqa: E402
 
 
 def attrs(span):
@@ -53,9 +53,14 @@ def main(kit):
                         rows.append({"case": case, "signature_check": "invalid_receipt_fields",
                                      "signature_valid": None})
                         continue
-                    rows.append({"case": case, "receipt": a["receipt.id"], "signing_bytes_utf8": b.decode(),
-                                 "length": len(b), "sha256": hashlib.sha256(b).hexdigest(),
-                                 "signature_valid": verifies(a, key)})
+                    row = {"case": case, "receipt": a["receipt.id"], "signing_bytes_utf8": b.decode(),
+                           "length": len(b), "sha256": hashlib.sha256(b).hexdigest()}
+                    try:
+                        row["signature_valid"] = verifies(a, key)
+                    except MalformedSignature:
+                        # Not checked, so neither valid nor invalid.
+                        row.update(signature_check="malformed_signature", signature_valid=None)
+                    rows.append(row)
         if len(rows) == before:
             rows.append({"case": case, "signature_check": "missing_signature", "signature_valid": None})
     return {"kit": kit, "python": platform.python_version(), "cryptography": cryptography.__version__,
