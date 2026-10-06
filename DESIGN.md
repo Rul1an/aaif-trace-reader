@@ -127,6 +127,17 @@ A separate program reads `report.json` and the test kit's expected answers and w
 - agreement with the expected answers and agreement with the other reader are two separate tables, never merged into one score;
 - keyless subjects are matched by kind and anchor (section 4), and where several share both, as a multiset of their answers, never by the `#n` ordinal (revision 7).
 
+Revision 8 (6 October 2026), implemented as `aaif_compare`: the kit published its expected-answer
+format (one flat `expected.json` per case), so the comparator scores the fields that format names,
+reading this reader's answers through a declared projection file (`projections/`), never through
+code. The rules above hold, adapted to that format: an expected field the run does not answer fails;
+a case whose processing is not `complete` fails; the all-unknown control runs before any scoring and
+aborts the comparison if it passes a positive case (expected effect `confirmed`); a field reported
+but not expected is recorded, not dropped; fields the query echoes (`action`) are marked
+`by_construction` and counted apart; agreement with the expected answers and with the other reader
+are two tables. Keyless matching and the relation-level rules apply to the full-report comparison,
+which the kit's format does not yet carry and which remains open.
+
 ## 8. Acceptance cases
 
 The first six degraded cases the contract lists (lines 178 to 183) are the first six rows, and the case v0.7 adds after them (line 184) is C6b; its two cases added in v0.3 (lines 185, 186) are C15 and C15d, its two cases added in v0.4 (lines 187, 188) are C15b and C15c, and its cases added in v0.5 to v0.7 (lines 189 to 191) are C14, C14b, C14a and C14c. Each has a positive twin (the same records with the degraded premise repaired; for C6b, C6 itself, with the reference added; for C14 and C14a, one of the two decisions removed, so a single decision stands and no applicability question arises; for C14b, the denial removed and the execution referencing the approval; for C14c, one approval removed and the execution referencing the other; in both the execution is `consistent` with the decision it followed, which is this reader's answer (IC-8), not the contract's). Rows after that are this reader's own, labeled as such until #42 publishes fixtures.

@@ -9,8 +9,10 @@ six ticket matches; it is not rewritten as a pass. See
 [the repair run](results/b658795-repaired/README.md) for source pins, command,
 raw reports, per-field comparison and limitations. The latest reader repairs
 were made after expected answers were known; this is not a blind evaluation.
-The general DESIGN section 7 comparator, full cross-reader comparison and runtime
-exports remain open. This does not complete WG Task 7.
+The DESIGN section 7 comparator now exists for the kit's answer format (`aaif_compare`); at kit
+`b658795` both readers agree on all 14 kit fields, with the shared R1/R5/R6 mapping as a common
+input ([comparator results](results/b658795-comparator/README.md)). Full-report comparison and
+runtime exports remain open. This does not complete WG Task 7.
 
 
 Tooling: the original reader was written with Claude Opus 5.5, directed and reviewed by the maintainer. The basis gate, separate signing check and bounded rerun were implemented with Codex. Frozen run metadata preserves the original reader attribution; BASIS-RERUN.md records the extension separately. It implements the interpretation register of DESIGN.md revision 7 against contract v0.7-draft (PR #51 head `e82abf1`). The two deviations the first slice had from revision 6 (`FINDINGS.md` D1, D2) are resolved: D1 by revision 7, D2 by the implementation following section 3.

@@ -27,5 +27,7 @@ jobs:
       - run: python3 tests/mutants.py
       - name: Bounded known-answer rerun
         run: python3 results/b658795-repaired/reproduce.py "$RUNNER_TEMP/repair-result"
+      - name: Comparator against the kit's expected answers
+        run: python3 -m aaif_compare --kit b6587950986eb4ec501e080cc9730fd21dcb69fa --run results/b658795-repaired/verified-run --expected inputs/expected-b6587950986eb4ec501e080cc9730fd21dcb69fa --projection projections/kit-b658795.json --out "$RUNNER_TEMP/comparison.json"
       - name: Reader remains unchanged after mutation controls
         run: git diff --exit-code -- aaif_reader
