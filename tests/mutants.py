@@ -166,6 +166,14 @@ MUTANTS = [
      '                and (not t.action_systems or system_of(key[0], ts) in t.action_systems))',
      '                and True)',
      ["tests.test_review_b658795.Review.test_4_executions_are_those_of_the_declared_issuing_system"]),
+    ("s1", "report an undecodable signature as a failed signature", "scripts/check_signing_input.py",
+     "        raise MalformedSignature('Signature is not valid base64') from exc",
+     "        return False",
+     ["tests.test_helper_failures.HelperFailures.test_invalid_signature_encoding"]),
+    ("s2", "record a malformed signature as invalid instead of unchecked", "scripts/signature_rows.py",
+     '                        row.update(signature_check="malformed_signature", signature_valid=None)',
+     '                        row.update(signature_valid=False)',
+     ["tests.test_helper_failures.HelperFailures.test_requested_signature_malformed"]),
 ]
 
 # Not a mutant: removing the UNRESOLVED/KEYLESS guard in query() (review finding 4,

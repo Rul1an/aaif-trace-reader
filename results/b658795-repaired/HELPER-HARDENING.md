@@ -11,6 +11,6 @@ Reader source was unchanged; no new semantics or blind result is claimed.
 The bounded runner rejects absent/invalid signature outcomes against a required
 boolean expectation. Download errors now stop rather than silently skipping inputs.
 
-This follows CodeRabbit findings4196339920,4196339940,4196339953,4196339977.
-The earlier published AAIF update links the retained earlier run and its92tests;
-those historical numbers remain true, not relabelled as97.
+This follows CodeRabbit findings 4196339920, 4196339940, 4196339953 and 4196339977.
+The earlier published AAIF update links the retained earlier run and its 92 tests;
+those historical numbers remain true, not relabelled as 97.
