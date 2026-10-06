@@ -20,6 +20,10 @@ def attrs(span):
     out = {}
     for a in span.get("attributes", []):
         v = a["value"]
+        if not v:
+            if a["key"].startswith("receipt."):
+                out[a["key"]] = None
+            continue
         out[a["key"]] = next(iter(v.values()))
     return out
 
@@ -34,16 +38,26 @@ def main(kit):
             rows.append({"case": case, "signature_check": "not_asked_by_basis"})
             continue
         export = json.loads((root / "cases" / case / "records.otlp.json").read_bytes())
+        before = len(rows)
         for rs in export["resourceSpans"]:
             for ss in rs["scopeSpans"]:
                 for sp in ss["spans"]:
                     a = attrs(sp)
                     if "receipt.signature" not in a:
                         continue
-                    b = signing_bytes(a)
+                    try:
+                        b = signing_bytes(a)
+                        if not isinstance(a["receipt.signature"], str):
+                            raise ValueError("Invalid signature value")
+                    except (KeyError, ValueError):
+                        rows.append({"case": case, "signature_check": "invalid_receipt_fields",
+                                     "signature_valid": None})
+                        continue
                     rows.append({"case": case, "receipt": a["receipt.id"], "signing_bytes_utf8": b.decode(),
                                  "length": len(b), "sha256": hashlib.sha256(b).hexdigest(),
                                  "signature_valid": verifies(a, key)})
+        if len(rows) == before:
+            rows.append({"case": case, "signature_check": "missing_signature", "signature_valid": None})
     return {"kit": kit, "python": platform.python_version(), "cryptography": cryptography.__version__,
             "key_sha256": hashlib.sha256(key).hexdigest(), "rows": rows,
             "claim": "Signature validity under the supplied synthetic key only; not actual effects or independence"}

@@ -3,6 +3,7 @@
 Requires cryptography. No assertion of service independence or real effects.
 """
 import base64
+import binascii
 import json
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.serialization import load_pem_public_key
@@ -21,9 +22,15 @@ def verifies(attributes, public_key):
     key = load_pem_public_key(public_key)
     if not isinstance(key, Ed25519PublicKey):
         raise ValueError('Expected Ed25519 SPKI key')
-    signature = base64.b64decode(attributes['receipt.signature'], validate=True)
-    if base64.b64encode(signature).decode() != attributes['receipt.signature']:
-        raise ValueError('Noncanonical base64 signature')
+    encoded = attributes.get('receipt.signature')
+    if not isinstance(encoded, str):
+        return False
+    try:
+        signature = base64.b64decode(encoded, validate=True)
+    except (binascii.Error, ValueError):
+        return False
+    if base64.b64encode(signature).decode() != encoded:
+        return False
     try:
         key.verify(signature, signing_bytes(attributes))
         return True
