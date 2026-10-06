@@ -27,5 +27,14 @@ jobs:
       - run: python3 tests/mutants.py
       - name: Bounded known-answer rerun
         run: python3 results/b658795-repaired/reproduce.py "$RUNNER_TEMP/repair-result"
+      - name: Comparator reproduces the committed comparison
+        run: |
+          OR=49727d483de0c4c96c61e0a5b2b1ed918abb4f39
+          mkdir -p inputs/other-reader-$OR
+          curl -fsSL -o inputs/other-reader-$OR/comparison.json \
+            https://raw.githubusercontent.com/agentrust-io/agentrust-telemetry/$OR/interop/aaif-trace-model/results/2026-10-05/comparison.json
+          echo "fb86f8c0e1d3e5a269a7eac84d4027c566e72aaa2c9d3d5c20dd80f0f333b147  inputs/other-reader-$OR/comparison.json" | shasum -a 256 -c
+          python3 -m aaif_compare --kit b6587950986eb4ec501e080cc9730fd21dcb69fa --run results/b658795-repaired/verified-run --expected inputs/expected-b6587950986eb4ec501e080cc9730fd21dcb69fa --projection projections/kit-b658795.json --other inputs/other-reader-$OR/comparison.json --out "$RUNNER_TEMP/comparison.json"
+          cmp "$RUNNER_TEMP/comparison.json" results/b658795-comparator/repaired-run.comparison.json
       - name: Reader remains unchanged after mutation controls
         run: git diff --exit-code -- aaif_reader

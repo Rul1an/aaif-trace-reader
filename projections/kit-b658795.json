@@ -1,0 +1,15 @@
+{
+  "projection_id": "aaif-test-kit-pr57-b658795",
+  "applies_to": "b6587950986eb4ec501e080cc9730fd21dcb69fa",
+  "notes": [
+    "Declares how this reader's report.json query section and the separate signature rows map onto the kit's expected.json fields. It is an input to the comparator, like the kit mapping is an input to the reader; the comparator hard-codes no field.",
+    "effect: established -> confirmed and unknown -> unconfirmed follow contract v0.7 lines 108-109; any other status (e.g. conflict) passes through unmapped and therefore cannot match.",
+    "action echoes evaluation_context, so its agreement is by construction and is counted apart from the other fields."
+  ],
+  "fields": {
+    "action": {"from": "report", "path": ["query", "context", "action"], "by_construction": true},
+    "effect": {"from": "report", "path": ["query", "status"], "map": {"established": "confirmed", "unknown": "unconfirmed"}},
+    "confirmed_tickets": {"from": "report", "path": ["query", "ticket_ids"]},
+    "receipt_signature_verified": {"from": "signatures", "key": "signature_valid"}
+  }
+}

@@ -1,0 +1,292 @@
+{
+  "kit": "b6587950986eb4ec501e080cc9730fd21dcb69fa",
+  "comparator": "aaif_compare, DESIGN.md section 7 revision 8",
+  "inputs": {
+    "projection": {
+      "path": "projections/kit-b658795.json",
+      "sha256": "b624b45bf41c4e874b1c66a3fe53ba0f61f50ac1bca31e4c5014997de9f7c17e"
+    },
+    "expected": {
+      "effects-action-id-reused-in-another-scope": "4203337c2a09e3e92681e57cff8d1527beb0910c444555ba54afc4f1f4834437",
+      "effects-receipt-delivered-twice": "4203337c2a09e3e92681e57cff8d1527beb0910c444555ba54afc4f1f4834437",
+      "effects-receipt-missing": "69044eea73a345494b923d2d7b63da3197bd8989fb90d3e78866161ca6b2e47a",
+      "effects-ticket-id-changed": "bee6ee2b87baa8e6188f2e5f830041cecf4b28b4ec52819cdfa12e2df4befba8",
+      "evidence-grade-pair-fails": "91f3380776b7ed110f10cf96e491cb762fa4ae1b09d685289562c245daa91c9e",
+      "evidence-grade-pair-verifies": "b5fa1767dfa6a2b58fc6d485f71c452cfb7033d151ab2da6b1fd54151f22ce96"
+    },
+    "reports": {
+      "effects-action-id-reused-in-another-scope": "bbdc03c5183333c200cbb7a327d20dd2cfa8ac11a23218700945666417f0b824",
+      "effects-receipt-delivered-twice": "879f6c7ae907f4d1a324058e73d189843906e936dbd03323600080700b255696",
+      "effects-receipt-missing": "c383d6d26ad6d5190de099669116c7c12702d8a4d94184bdb1ef42999d4c5e63",
+      "effects-ticket-id-changed": "db00d52f92a4308c9470370aba33564c746471d7b37b1fc2ae7507ca47f1e29e",
+      "evidence-grade-pair-fails": "eca5f3933422e1b14a1ee698b08f64280943e9b0c21483cf4a5187e81e8d3cc9",
+      "evidence-grade-pair-verifies": "e44da64774fac9e341527c94ef9aab39ebfb331d69d62b87a1d3f9449c33661a"
+    },
+    "signatures": "24d0532566efbff7d473c7d37fd908c93c74941e5600be719f9a716531a2b777"
+  },
+  "controls": {
+    "all_unknown": {
+      "positive_cases": [
+        "effects-action-id-reused-in-another-scope",
+        "effects-receipt-delivered-twice",
+        "effects-ticket-id-changed",
+        "evidence-grade-pair-fails",
+        "evidence-grade-pair-verifies"
+      ],
+      "result": "no positive expected answer from an all-unknown run, as required"
+    }
+  },
+  "vs_expected": {
+    "cases": [
+      {
+        "case": "effects-action-id-reused-in-another-scope",
+        "all_fields_match": true,
+        "fields": [
+          {
+            "field": "action",
+            "expected": "P1",
+            "actual": "P1",
+            "by_construction": true,
+            "match": true
+          },
+          {
+            "field": "effect",
+            "expected": "confirmed",
+            "actual": "confirmed",
+            "match": true
+          },
+          {
+            "field": "confirmed_tickets",
+            "expected": [
+              "T-1042"
+            ],
+            "actual": [
+              "T-1042"
+            ],
+            "match": true
+          }
+        ],
+        "reported_not_expected": []
+      },
+      {
+        "case": "effects-receipt-delivered-twice",
+        "all_fields_match": true,
+        "fields": [
+          {
+            "field": "action",
+            "expected": "P1",
+            "actual": "P1",
+            "by_construction": true,
+            "match": true
+          },
+          {
+            "field": "effect",
+            "expected": "confirmed",
+            "actual": "confirmed",
+            "match": true
+          },
+          {
+            "field": "confirmed_tickets",
+            "expected": [
+              "T-1042"
+            ],
+            "actual": [
+              "T-1042"
+            ],
+            "match": true
+          }
+        ],
+        "reported_not_expected": []
+      },
+      {
+        "case": "effects-receipt-missing",
+        "all_fields_match": false,
+        "fields": [
+          {
+            "field": "action",
+            "expected": "P1",
+            "actual": "P1",
+            "by_construction": true,
+            "match": true
+          },
+          {
+            "field": "effect",
+            "expected": "unconfirmed",
+            "actual": "unconfirmed",
+            "match": true
+          },
+          {
+            "field": "confirmed_tickets",
+            "expected": null,
+            "actual": [],
+            "match": false,
+            "reason": "differs"
+          }
+        ],
+        "reported_not_expected": []
+      },
+      {
+        "case": "effects-ticket-id-changed",
+        "all_fields_match": true,
+        "fields": [
+          {
+            "field": "action",
+            "expected": "P1",
+            "actual": "P1",
+            "by_construction": true,
+            "match": true
+          },
+          {
+            "field": "effect",
+            "expected": "confirmed",
+            "actual": "confirmed",
+            "match": true
+          },
+          {
+            "field": "confirmed_tickets",
+            "expected": [
+              "T-2088"
+            ],
+            "actual": [
+              "T-2088"
+            ],
+            "match": true
+          }
+        ],
+        "reported_not_expected": []
+      },
+      {
+        "case": "evidence-grade-pair-fails",
+        "all_fields_match": true,
+        "fields": [
+          {
+            "field": "action",
+            "expected": "P1",
+            "actual": "P1",
+            "by_construction": true,
+            "match": true
+          },
+          {
+            "field": "effect",
+            "expected": "confirmed",
+            "actual": "confirmed",
+            "match": true
+          },
+          {
+            "field": "confirmed_tickets",
+            "expected": [
+              "T-1042"
+            ],
+            "actual": [
+              "T-1042"
+            ],
+            "match": true
+          },
+          {
+            "field": "receipt_signature_verified",
+            "expected": false,
+            "actual": false,
+            "match": true
+          }
+        ],
+        "reported_not_expected": []
+      },
+      {
+        "case": "evidence-grade-pair-verifies",
+        "all_fields_match": true,
+        "fields": [
+          {
+            "field": "action",
+            "expected": "P1",
+            "actual": "P1",
+            "by_construction": true,
+            "match": true
+          },
+          {
+            "field": "effect",
+            "expected": "confirmed",
+            "actual": "confirmed",
+            "match": true
+          },
+          {
+            "field": "confirmed_tickets",
+            "expected": [
+              "T-1042"
+            ],
+            "actual": [
+              "T-1042"
+            ],
+            "match": true
+          },
+          {
+            "field": "receipt_signature_verified",
+            "expected": true,
+            "actual": true,
+            "match": true
+          }
+        ],
+        "reported_not_expected": []
+      }
+    ],
+    "summary": {
+      "cases": 6,
+      "cases_all_fields_match": 5,
+      "fields_matched": 13,
+      "fields_compared": 14,
+      "by_construction_fields_matched": 6,
+      "reported_not_expected": 0
+    }
+  },
+  "vs_other_reader": {
+    "cases": [
+      {
+        "case": "effects-action-id-reused-in-another-scope",
+        "other_reader": "no row at this kit revision",
+        "all_fields_agree": false,
+        "fields": []
+      },
+      {
+        "case": "effects-receipt-delivered-twice",
+        "other_reader": "no row at this kit revision",
+        "all_fields_agree": false,
+        "fields": []
+      },
+      {
+        "case": "effects-receipt-missing",
+        "other_reader": "no row at this kit revision",
+        "all_fields_agree": false,
+        "fields": []
+      },
+      {
+        "case": "effects-ticket-id-changed",
+        "other_reader": "no row at this kit revision",
+        "all_fields_agree": false,
+        "fields": []
+      },
+      {
+        "case": "evidence-grade-pair-fails",
+        "other_reader": "no row at this kit revision",
+        "all_fields_agree": false,
+        "fields": []
+      },
+      {
+        "case": "evidence-grade-pair-verifies",
+        "other_reader": "no row at this kit revision",
+        "all_fields_agree": false,
+        "fields": []
+      }
+    ],
+    "summary": {
+      "cases_with_a_row": 0,
+      "cases_all_fields_agree": 0,
+      "fields_agree": 0,
+      "fields_compared": 0,
+      "by_construction_fields_agree": 0
+    }
+  },
+  "limits": [
+    "Agreement with the expected answers and with the other reader are separate tables, never one score.",
+    "Fields marked by_construction agree because the query echoes them; they are counted apart.",
+    "A comparison of answers on synthetic fixtures; it says nothing about real effects or exports."
+  ]
+}
