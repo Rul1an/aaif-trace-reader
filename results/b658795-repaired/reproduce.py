@@ -27,7 +27,7 @@ def main():
     if cases != pinned_cases or len(cases) != 6:
         raise ValueError('Case population differs from pinned six cases')
     head = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
-    paths = ['aaif_reader', 'mappings', 'scripts', 'results/b658795-repaired/reproduce.py']
+    paths = ['aaif_reader', 'mappings', 'scripts', 'results/b658795-repaired/reproduce.py', 'results/b658795/inputs.sha256.json']
     if subprocess.check_output(['git', 'status', '--porcelain', '--', *paths], cwd=ROOT, text=True).strip():
         raise ValueError('Commit execution sources before measuring')
     def run(cmd):
