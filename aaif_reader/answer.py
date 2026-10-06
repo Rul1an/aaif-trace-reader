@@ -270,8 +270,10 @@ def query(t: Tables, ctx):
            "execution": "established" if executions else "unknown",
            "executions": [k(e) for e in executions],
            "effects": views}
+    # F5: with no effect established, the answer fields are unknown (null), never
+    # an empty list, which would read as "none created" (contract line 108).
     for name in names:
-        out[name] = sorted({v for view in views for v in view[name]})
+        out[name] = sorted({v for view in views for v in view[name]}) if efs else None
     if not efs:
         out["status"] = "unknown"
         out["missing"] = ["an external effect from the queried service in the queried scope, correlated to an execution of the queried action (R6); a missing receipt makes the effect unknown, not absent (contract line 108)"]

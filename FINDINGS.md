@@ -111,3 +111,7 @@ its own, an empty list says no ticket was created, which a missing receipt does 
 only because the status is unknown, and says so. This is this reader's defect, not the kit's;
 the fix is to emit null whenever the effect is not established, with a test and a mutant, in a
 revision after this frozen run rather than inside it.
+
+F5 resolved in the revision after `c774b0e`: the query emits null answer fields whenever no
+effect is established; test `test_missing_receipt_is_unknown_not_absent` and mutant b13 pin it.
+The frozen b6587950 results are not rerun or edited.

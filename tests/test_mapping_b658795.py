@@ -72,7 +72,7 @@ class TenantScope(unittest.TestCase):
         raw = export(agent("tenant-a"), ("test-ticket-service", "tenant-b", [receipt("03", "T-2088")]))
         q = query(raw, "tenant-a")
         self.assertEqual(q["status"], "unknown")
-        self.assertEqual(q["ticket_ids"], [])
+        self.assertIsNone(q["ticket_ids"])
         self.assertEqual(q["effects"], [])
 
     def test_same_receipt_key_in_two_tenants_is_two_effects_not_a_conflict(self):
@@ -112,7 +112,7 @@ class TicketIds(unittest.TestCase):
         q = query(export(agent(None)), None)
         self.assertEqual(q["status"], "unknown")
         self.assertEqual(q["execution"], "established")
-        self.assertEqual(q["ticket_ids"], [])
+        self.assertIsNone(q["ticket_ids"])  # F5: unknown, not an empty list
 
     def test_conflicting_ticket_ids_on_one_receipt_are_kept(self):
         raw = export(agent(None), ("test-ticket-service", None, [receipt("03", "T-1042"), receipt("04", "T-2088")]))

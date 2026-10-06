@@ -146,6 +146,10 @@ MUTANTS = [
      '    if "@" in system:\n        return None',
      '    if False:\n        return None',
      ["tests.test_mapping_b658795.TenantScope.test_separator_in_scope_is_unreadable"]),
+    ("b13", "report an unknown effect's answer fields as an empty list (F5)", R + "answer.py",
+     '        out[name] = sorted({v for view in views for v in view[name]}) if efs else None',
+     '        out[name] = sorted({v for view in views for v in view[name]})',
+     ["tests.test_mapping_b658795.TicketIds.test_missing_receipt_is_unknown_not_absent"]),
 ]
 
 
