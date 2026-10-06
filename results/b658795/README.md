@@ -22,7 +22,7 @@ byte-identical to 4a028675ef.
 | --- | --- | --- | --- | --- |
 | action id reused in another scope | P1, test-ticket-service, tenant-a | established: `R-9` in `test-ticket-service@tenant-a` | T-1042 | not asked |
 | receipt delivered twice | P1, test-ticket-service, no tenant | established: `R-1`, two deliveries | T-1042 | not asked |
-| receipt missing | P1, test-ticket-service, no tenant | unknown (execution established, no R6) | none | not asked |
+| receipt missing | P1, test-ticket-service, no tenant | unknown (execution established, no R6) | `[]` in frozen output (F5 defect; actual ticket outcome unknown) | not asked |
 | ticket id changed | P1, test-ticket-service, no tenant | established: `R-9` | T-2088 | not asked |
 | pair fails | P1, test-ticket-service, no tenant | established: `R-7` | T-1042 | invalid |
 | pair verifies | P1, test-ticket-service, no tenant | established: `R-7` | T-1042 | valid |

@@ -107,8 +107,9 @@ the first time, and the comparison runs once per pinned fixture revision (sectio
 `effects-receipt-missing` the frozen query answer at `f48a01d` carries `ticket_ids: []`
 beside `status: unknown`; the kit's expected answer is `confirmed_tickets: null`. Read on
 its own, an empty list says no ticket was created, which a missing receipt does not establish
-(contract line 108). The comparison (`results/b658795/comparison.json`) maps the field to null
-only because the status is unknown, and says so. This is this reader's defect, not the kit's;
+(contract line 108). The initial comparison mapped the field to null because the status was unknown.
+That normalization has been withdrawn: `results/b658795/comparison.json` now records
+a ticket mismatch for this case (5 of 6 ticket matches). This is this reader's defect, not the kit's;
 the fix is to emit null whenever the effect is not established, with a test and a mutant, in a
 revision after this frozen run rather than inside it.
 
