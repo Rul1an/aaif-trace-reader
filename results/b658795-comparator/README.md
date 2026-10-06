@@ -6,12 +6,14 @@ Nothing was rerun for this record: both inputs are committed reports.
 | Input | Against the kit's expected answers | Against the other reader |
 | --- | --- | --- |
 | `results/b658795-repaired/verified-run` (reader at 59b3a06) | 6 of 6 cases; 14 of 14 fields, plus 6 by-construction `action` fields | 6 of 6 cases; 14 of 14 fields, plus 6 by-construction fields |
-| `results/b658795` (frozen run, reader 2d7d3ba) | 5 of 6 cases; 13 of 14 fields: `effects-receipt-missing` reports `[]` where `null` is expected (FINDINGS F5) | not compared |
+| `results/b658795` (frozen run, reader 2d7d3ba) | 5 of 6 cases; 13 of 14 fields: `effects-receipt-missing` reports `[]` where `null` is expected (FINDINGS F5) | not compared (no `--other` given) |
 
 The frozen run is the comparator's positive control on real data: it finds F5 on its own, with
 no normalisation, which the first hand-written comparison did not. Before scoring, the comparator
-also checks that a synthetic all-unknown run fails every positive case, and refuses to score if
-it does not.
+also projects a synthetic all-unknown run for every positive case and refuses to score if any
+field comes out equal to its positive expected answer. That control was checked field by field
+after an independent review showed a whole-case version would not have caught a wrong `effect`
+mapping.
 
 ## Inputs
 
@@ -35,12 +37,18 @@ python3 -m aaif_compare --kit b6587950986eb4ec501e080cc9730fd21dcb69fa \
   --run results/b658795-repaired/verified-run --expected inputs/expected-b6587950986eb4ec501e080cc9730fd21dcb69fa \
   --projection projections/kit-b658795.json \
   --other inputs/other-reader-49727d483de0c4c96c61e0a5b2b1ed918abb4f39/comparison.json --out OUT.json
+python3 -m aaif_compare --kit b6587950986eb4ec501e080cc9730fd21dcb69fa \
+  --run results/b658795 --expected inputs/expected-b6587950986eb4ec501e080cc9730fd21dcb69fa \
+  --projection projections/kit-b658795.json --out OUT-frozen.json   # exits 1: F5
 ```
+
+Both outputs are byte-identical to the committed files; CI checks the first.
 
 ## What this does and does not show
 
-Shows: on these six synthetic cases the two readers give the same answer on every kit field, and
-both match the kit. The two tables are kept apart and never summed into one score.
+Shows: on these six synthetic cases this reader's answers and the `actual` column of the other
+reader's own published comparison are the same on every kit field, and this reader matches the kit.
+The other side is that comparison file, not the other reader's raw report. The two tables are kept apart and never summed into one score.
 
 Does not show:
 - independent interpretation of the links: both readers apply the kit's declared R1/R5/R6

@@ -37,7 +37,7 @@
         "evidence-grade-pair-fails",
         "evidence-grade-pair-verifies"
       ],
-      "result": "failed every positive case, as required"
+      "result": "no positive expected answer from an all-unknown run, as required"
     }
   },
   "vs_expected": {
@@ -244,7 +244,6 @@
     "cases": [
       {
         "case": "effects-action-id-reused-in-another-scope",
-        "all_fields_agree": true,
         "fields": [
           {
             "field": "action",
@@ -269,11 +268,11 @@
             "theirs": "confirmed",
             "agree": true
           }
-        ]
+        ],
+        "all_fields_agree": true
       },
       {
         "case": "effects-receipt-delivered-twice",
-        "all_fields_agree": true,
         "fields": [
           {
             "field": "action",
@@ -298,11 +297,11 @@
             "theirs": "confirmed",
             "agree": true
           }
-        ]
+        ],
+        "all_fields_agree": true
       },
       {
         "case": "effects-receipt-missing",
-        "all_fields_agree": true,
         "fields": [
           {
             "field": "action",
@@ -323,11 +322,11 @@
             "theirs": "unconfirmed",
             "agree": true
           }
-        ]
+        ],
+        "all_fields_agree": true
       },
       {
         "case": "effects-ticket-id-changed",
-        "all_fields_agree": true,
         "fields": [
           {
             "field": "action",
@@ -352,11 +351,11 @@
             "theirs": "confirmed",
             "agree": true
           }
-        ]
+        ],
+        "all_fields_agree": true
       },
       {
         "case": "evidence-grade-pair-fails",
-        "all_fields_agree": true,
         "fields": [
           {
             "field": "action",
@@ -387,11 +386,11 @@
             "theirs": false,
             "agree": true
           }
-        ]
+        ],
+        "all_fields_agree": true
       },
       {
         "case": "evidence-grade-pair-verifies",
-        "all_fields_agree": true,
         "fields": [
           {
             "field": "action",
@@ -422,7 +421,8 @@
             "theirs": true,
             "agree": true
           }
-        ]
+        ],
+        "all_fields_agree": true
       }
     ],
     "summary": {

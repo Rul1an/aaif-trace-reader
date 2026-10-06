@@ -67,7 +67,7 @@ class Comparator(unittest.TestCase):
 
     def test_all_unknown_control_runs_and_fails_positive_cases(self):
         control = self.run_cmp()["controls"]["all_unknown"]
-        self.assertEqual(control["result"], "failed every positive case, as required")
+        self.assertEqual(control["result"], "no positive expected answer from an all-unknown run, as required")
         self.assertEqual(sorted(control["positive_cases"]), ["c-confirmed", "c-signed"])
 
     def test_a_projection_that_lets_unknown_pass_aborts_the_comparison(self):
@@ -78,7 +78,57 @@ class Comparator(unittest.TestCase):
             self.run_cmp(projection=projection, signatures={"c-signed": []},
                          expected={k: v for k, v in self.expected.items() if k != "c-signed"})
 
-    def test_an_unexpected_reported_field_is_a_disagreement_not_dropped(self):
+    def test_the_control_catches_an_effect_mapping_that_turns_unknown_into_confirmed(self):
+        # Review blocker: with tickets and signatures failing anyway, a whole-case
+        # control never looked at the effect mapping.
+        projection = copy.deepcopy(PROJECTION)
+        projection["fields"]["effect"]["map"]["unknown"] = "confirmed"
+        with self.assertRaises(ControlFailed):
+            self.run_cmp(projection=projection)
+
+    def test_types_are_compared_strictly(self):
+        signatures = {"c-signed": [{"case": "c-signed", "signature_valid": 1}]}
+        case = {c["case"]: c for c in self.run_cmp(signatures=signatures)["vs_expected"]["cases"]}["c-signed"]
+        self.assertFalse({f["field"]: f for f in case["fields"]}["receipt_signature_verified"]["match"])
+        other = copy.deepcopy(self.other)
+        other[2]["fields"][3]["actual"] = 1
+        o = {c["case"]: c for c in self.run_cmp(other=other)["vs_other_reader"]["cases"]}["c-signed"]
+        self.assertFalse(o["all_fields_agree"])
+
+    def test_a_missing_actual_on_the_other_side_is_not_agreement(self):
+        other = copy.deepcopy(self.other)
+        del other[1]["fields"][2]["actual"]
+        o = {c["case"]: c for c in self.run_cmp(other=other)["vs_other_reader"]["cases"]}["c-missing"]
+        self.assertFalse(o["all_fields_agree"])
+
+    def test_duplicate_other_reader_rows_for_one_case_are_not_resolved_silently(self):
+        other = copy.deepcopy(self.other)
+        dup = copy.deepcopy(other[0]); dup["fields"][2]["actual"] = ["T-9"]
+        other.insert(0, dup)
+        o = {c["case"]: c for c in self.run_cmp(other=other)["vs_other_reader"]["cases"]}["c-confirmed"]
+        self.assertFalse(o["all_fields_agree"])
+        self.assertEqual(o.get("other_reader"), "more than one row for this case")
+
+    def test_an_other_reader_run_that_did_not_complete_does_not_agree(self):
+        other = copy.deepcopy(self.other)
+        other[0].update(exit_code=2, selected_answers=0, **{"pass": False})
+        o = {c["case"]: c for c in self.run_cmp(other=other)["vs_other_reader"]["cases"]}["c-confirmed"]
+        self.assertFalse(o["all_fields_agree"])
+
+    def test_revision_must_match_exactly(self):
+        other = copy.deepcopy(self.other)
+        for row in other:
+            row["revision"] = KIT[:8] + "0" * 32
+        cases = self.run_cmp(other=other)["vs_other_reader"]["cases"]
+        self.assertTrue(all(c.get("other_reader") == "no row at this kit revision" for c in cases))
+
+    def test_an_empty_expected_answer_does_not_match(self):
+        expected = copy.deepcopy(self.expected)
+        expected["c-confirmed"] = {}
+        case = {c["case"]: c for c in self.run_cmp(expected=expected)["vs_expected"]["cases"]}["c-confirmed"]
+        self.assertFalse(case["all_fields_match"])
+
+    def test_an_unexpected_reported_field_is_recorded_not_dropped(self):
         expected = copy.deepcopy(self.expected)
         del expected["c-signed"]["receipt_signature_verified"]
         case = {c["case"]: c for c in self.run_cmp(expected=expected)["vs_expected"]["cases"]}["c-signed"]

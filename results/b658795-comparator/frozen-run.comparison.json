@@ -33,7 +33,7 @@
         "evidence-grade-pair-fails",
         "evidence-grade-pair-verifies"
       ],
-      "result": "failed every positive case, as required"
+      "result": "no positive expected answer from an all-unknown run, as required"
     }
   },
   "vs_expected": {

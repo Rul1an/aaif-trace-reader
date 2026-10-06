@@ -130,13 +130,22 @@ A separate program reads `report.json` and the test kit's expected answers and w
 Revision 8 (6 October 2026), implemented as `aaif_compare`: the kit published its expected-answer
 format (one flat `expected.json` per case), so the comparator scores the fields that format names,
 reading this reader's answers through a declared projection file (`projections/`), never through
-code. The rules above hold, adapted to that format: an expected field the run does not answer fails;
-a case whose processing is not `complete` fails; the all-unknown control runs before any scoring and
-aborts the comparison if it passes a positive case (expected effect `confirmed`); a field reported
-but not expected is recorded, not dropped; fields the query echoes (`action`) are marked
+code. Implemented from the rules above, adapted to that format: an expected field the run does not
+answer fails; a case whose processing is not `complete` fails; the all-unknown control runs before any
+scoring and aborts the comparison if, for any positive case (expected effect `confirmed`), an
+all-unknown run yields a field's positive expected answer; a field reported but not expected is
+recorded, not dropped; fields the query echoes (`action`) are marked
 `by_construction` and counted apart; agreement with the expected answers and with the other reader
-are two tables. Keyless matching and the relation-level rules apply to the full-report comparison,
-which the kit's format does not yet carry and which remains open.
+are two tables. Values are compared strictly by type, an expected answer with no fields never
+matches, and the other reader's rows must carry the exact kit revision, one row per case, a completed
+run and an actual value per field.
+
+Not implemented in revision 8, because the kit's flat format does not carry what they read:
+the `not_answered` rule, the rule that an expected `unresolved` or `decision: unknown` matches only
+that answer field (with its C6a to C14c control), and keyless matching by kind and anchor. A field
+reported but not expected is recorded in `reported_not_expected`; it is not yet tied to the contract
+sentence and IC row that produced it, and it does not change a match. These apply to a full-report
+comparison, which remains open.
 
 ## 8. Acceptance cases
 
