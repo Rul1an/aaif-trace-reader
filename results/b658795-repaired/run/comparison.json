@@ -1,0 +1,176 @@
+{
+  "kit": "b6587950986eb4ec501e080cc9730fd21dcb69fa",
+  "reader_and_runner_commit": "a9ad3186d157b9f8aed9a7cea68800d77b6f6287",
+  "python": "3.14.3",
+  "answer_blind": false,
+  "kind": "known-answer repair validation",
+  "rows": [
+    {
+      "case": "effects-action-id-reused-in-another-scope",
+      "processing_complete": true,
+      "execution_observation": "established",
+      "fields": {
+        "action": {
+          "actual": "P1",
+          "expected": "P1",
+          "match": true
+        },
+        "confirmed_tickets": {
+          "actual": [
+            "T-1042"
+          ],
+          "expected": [
+            "T-1042"
+          ],
+          "match": true
+        },
+        "effect": {
+          "actual": "confirmed",
+          "expected": "confirmed",
+          "match": true
+        }
+      }
+    },
+    {
+      "case": "effects-receipt-delivered-twice",
+      "processing_complete": true,
+      "execution_observation": "established",
+      "fields": {
+        "action": {
+          "actual": "P1",
+          "expected": "P1",
+          "match": true
+        },
+        "confirmed_tickets": {
+          "actual": [
+            "T-1042"
+          ],
+          "expected": [
+            "T-1042"
+          ],
+          "match": true
+        },
+        "effect": {
+          "actual": "confirmed",
+          "expected": "confirmed",
+          "match": true
+        }
+      }
+    },
+    {
+      "case": "effects-receipt-missing",
+      "processing_complete": true,
+      "execution_observation": "established",
+      "fields": {
+        "action": {
+          "actual": "P1",
+          "expected": "P1",
+          "match": true
+        },
+        "confirmed_tickets": {
+          "actual": null,
+          "expected": null,
+          "match": true
+        },
+        "effect": {
+          "actual": "unconfirmed",
+          "expected": "unconfirmed",
+          "match": true
+        }
+      }
+    },
+    {
+      "case": "effects-ticket-id-changed",
+      "processing_complete": true,
+      "execution_observation": "established",
+      "fields": {
+        "action": {
+          "actual": "P1",
+          "expected": "P1",
+          "match": true
+        },
+        "confirmed_tickets": {
+          "actual": [
+            "T-2088"
+          ],
+          "expected": [
+            "T-2088"
+          ],
+          "match": true
+        },
+        "effect": {
+          "actual": "confirmed",
+          "expected": "confirmed",
+          "match": true
+        }
+      }
+    },
+    {
+      "case": "evidence-grade-pair-fails",
+      "processing_complete": true,
+      "execution_observation": "established",
+      "fields": {
+        "action": {
+          "actual": "P1",
+          "expected": "P1",
+          "match": true
+        },
+        "confirmed_tickets": {
+          "actual": [
+            "T-1042"
+          ],
+          "expected": [
+            "T-1042"
+          ],
+          "match": true
+        },
+        "effect": {
+          "actual": "confirmed",
+          "expected": "confirmed",
+          "match": true
+        },
+        "receipt_signature_verified": {
+          "actual": false,
+          "expected": false,
+          "match": true
+        }
+      }
+    },
+    {
+      "case": "evidence-grade-pair-verifies",
+      "processing_complete": true,
+      "execution_observation": "established",
+      "fields": {
+        "action": {
+          "actual": "P1",
+          "expected": "P1",
+          "match": true
+        },
+        "confirmed_tickets": {
+          "actual": [
+            "T-1042"
+          ],
+          "expected": [
+            "T-1042"
+          ],
+          "match": true
+        },
+        "effect": {
+          "actual": "confirmed",
+          "expected": "confirmed",
+          "match": true
+        },
+        "receipt_signature_verified": {
+          "actual": true,
+          "expected": true,
+          "match": true
+        }
+      }
+    }
+  ],
+  "limits": [
+    "Action echoes evaluation_context; not independent action inference.",
+    "Signatures are separate checks under a synthetic key; do not authenticate tenant metadata.",
+    "Not the general DESIGN comparator or completion of Task 7."
+  ]
+}

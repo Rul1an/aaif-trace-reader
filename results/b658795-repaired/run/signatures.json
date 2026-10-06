@@ -1,0 +1,41 @@
+{
+  "kit": "b6587950986eb4ec501e080cc9730fd21dcb69fa",
+  "python": "3.14.3",
+  "cryptography": "46.0.7",
+  "key_sha256": "7e2cca85e60abde07c9ca696630a8792f4429fa71a1a7a6b977a6f38e8619da0",
+  "rows": [
+    {
+      "case": "effects-action-id-reused-in-another-scope",
+      "signature_check": "not_asked_by_basis"
+    },
+    {
+      "case": "effects-receipt-delivered-twice",
+      "signature_check": "not_asked_by_basis"
+    },
+    {
+      "case": "effects-receipt-missing",
+      "signature_check": "not_asked_by_basis"
+    },
+    {
+      "case": "effects-ticket-id-changed",
+      "signature_check": "not_asked_by_basis"
+    },
+    {
+      "case": "evidence-grade-pair-fails",
+      "receipt": "R-7",
+      "signing_bytes_utf8": "{\"action_id\":\"P1\",\"created_at\":\"2026-09-21T15:00:00Z\",\"receipt_id\":\"R-7\",\"service\":\"test-ticket-service\",\"ticket_id\":\"T-1042\"}",
+      "length": 126,
+      "sha256": "194b732ee70ed682521af21c94fcfedd176ea6240e26fecf6fdaeb3df8a19f22",
+      "signature_valid": false
+    },
+    {
+      "case": "evidence-grade-pair-verifies",
+      "receipt": "R-7",
+      "signing_bytes_utf8": "{\"action_id\":\"P1\",\"created_at\":\"2026-09-21T15:00:00Z\",\"receipt_id\":\"R-7\",\"service\":\"test-ticket-service\",\"ticket_id\":\"T-1042\"}",
+      "length": 126,
+      "sha256": "194b732ee70ed682521af21c94fcfedd176ea6240e26fecf6fdaeb3df8a19f22",
+      "signature_valid": true
+    }
+  ],
+  "claim": "Signature validity under the supplied synthetic key only; not actual effects or independence"
+}
